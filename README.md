@@ -47,7 +47,7 @@ Toplantı ScreenShotları :
 ### • Sprint board update: Sprint board screenshot:
 <img width="1143" height="864" alt="image (1)" src="https://github.com/user-attachments/assets/c4a84745-ec81-4bc9-890a-a1ed2b67d80d" />
 
-### • Ürün Durumu: ### Ekran görüntüleri:
+### • Ürün Durumu: Ekran görüntüleri:
 <img width="1600" height="781" alt="giriş" src="https://github.com/user-attachments/assets/1a26f222-9b8b-4346-b6d7-810366464650" />
 
 <img width="1600" height="787" alt="yeniproblem" src="https://github.com/user-attachments/assets/4996aa98-421c-4bba-85a3-eacf8c90d775" />
