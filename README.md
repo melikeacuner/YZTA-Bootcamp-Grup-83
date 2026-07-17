@@ -34,7 +34,8 @@ Backlog'umuz bir sonraki sprintlerin temelini atacak şekilde düzenlenmiştir. 
 ### - Daily Scrum:
 Daily Scrum toplantıları ekip yoğunlukları nedeniyle her gün düzenli yapılamamış, haftalık olarak Slack ve Google Meet üzerinden gerçekleştirilmiştir.
 Toplantı ScreenShotları :
-<img width="2360" height="1640" alt="IMG_1284" src="https://github.com/user-attachments/assets/574b88e9-33f7-41f5-b587-2eca7230e81b" />
+<img width="2360" height="1470" alt="IMG_1284" src="https://github.com/user-attachments/assets/f2976faf-f4cc-4a23-a3ad-9f1095cb273a" />
+
 
 ### - Sprint board update: Sprint board screenshot:
 <img width="1143" height="864" alt="image (1)" src="https://github.com/user-attachments/assets/c4a84745-ec81-4bc9-890a-a1ed2b67d80d" />
