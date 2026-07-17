@@ -32,6 +32,15 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = Field(default=None)
     gemini_llm_model: str = Field(default="gemini-1.5-flash")
     gemini_embedding_model: str = Field(default="text-embedding-004")
+    embedding_dimension: int = Field(default=768)
+    llm_timeout_seconds: float = Field(default=3.0)
+
+    rag_similarity_threshold: float = Field(default=0.5)
+    rag_max_results: int = Field(default=10)
+    search_cache_ttl_seconds: int = Field(default=300)
+
+    embedding_max_retries: int = Field(default=3)
+    embedding_retry_interval_seconds: int = Field(default=30)
 
     cors_allow_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
