@@ -53,3 +53,55 @@ def require_role(*allowed_roles: UserRole) -> Callable[[User], Awaitable[User]]:
 
 require_admin = require_role(UserRole.ADMIN)
 require_any_role = require_role(UserRole.USER, UserRole.ADMIN)
+
+
+def get_auth_service(db: AsyncSession = Depends(get_db_session)):
+    from app.services.auth_service import AuthService
+
+    return AuthService(db)
+
+
+def get_session_service(db: AsyncSession = Depends(get_db_session)):
+    from app.services.session_service import SessionService
+
+    return SessionService(db)
+
+
+def get_qdrant_repository():
+    from app.infrastructure.repositories.qdrant_repository import QdrantRepository
+
+    return QdrantRepository()
+
+
+def get_embedding_service():
+    from app.services.embedding_service import EmbeddingService
+
+    return EmbeddingService()
+
+
+def get_redis_client():
+    from app.infrastructure.cache.redis_client import create_redis_client
+
+    return create_redis_client()
+
+
+def get_rag_service(
+    embedding_service=Depends(get_embedding_service),
+    qdrant_repository=Depends(get_qdrant_repository),
+    redis_client=Depends(get_redis_client),
+):
+    from app.services.rag_service import RAGSearchService
+
+    return RAGSearchService(embedding_service, qdrant_repository, cache=redis_client)
+
+
+def get_knowledge_service(
+    db: AsyncSession = Depends(get_db_session),
+    embedding_service=Depends(get_embedding_service),
+    qdrant_repository=Depends(get_qdrant_repository),
+):
+    from app.services.embedding_pipeline import EmbeddingPipeline
+    from app.services.knowledge_service import KnowledgeService
+
+    pipeline = EmbeddingPipeline(embedding_service, qdrant_repository)
+    return KnowledgeService(db, pipeline, qdrant_repository)

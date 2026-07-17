@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.domain.enums import EmbeddingStatus, MethodologyType, SessionStatus
 from app.domain.methodology import EightDReport, IshikawaData, PDCACycle, WhyChain
+from app.domain.validation import validate_lessons_learned
 
 
 def _utcnow() -> datetime:
@@ -40,12 +41,7 @@ class ProblemRecord(BaseModel):
     @field_validator("lessons_learned")
     @classmethod
     def validate_lessons_learned_word_count(cls, value: str) -> str:
-        word_count = len(value.split())
-        if not (100 <= word_count <= 500):
-            raise ValueError(
-                f"lessons_learned 100-500 kelime aralığında olmalıdır (şu an: {word_count})"
-            )
-        return value
+        return validate_lessons_learned(value)
 
     def model_dump_json_pretty(self) -> str:
         """2 boşluklu girinti ve sözlük sırasıyla anahtarlar (round-trip serileştirme için)."""
