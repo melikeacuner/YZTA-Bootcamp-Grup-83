@@ -12,3 +12,12 @@ def validate_search_query(text: str) -> str:
     if not (10 <= length <= 500):
         raise ValueError(f"Arama sorgusu 10-500 karakter araliginda olmalidir (su an: {length})")
     return text
+
+
+def validate_lessons_learned(text: str) -> str:
+    word_count = len(text.split())
+    if not (100 <= word_count <= 500):
+        raise ValueError(
+            f"lessons_learned 100-500 kelime araliginda olmalidir (su an: {word_count})"
+        )
+    return text
