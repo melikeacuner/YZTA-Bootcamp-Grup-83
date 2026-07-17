@@ -50,46 +50,50 @@ Bu sprintte projenin temel yapısı netleştirildi ve güçlü bir başlangıç 
 ### - Sprint Retrospective:
 Sprint genel olarak verimli geçti ancak bazı teknik konuların beklenenden daha karmaşık olduğu görüldü. Özellikle AI ve RAG tarafında daha fazla araştırma ihtiyacı ortaya çıktı. UI/UX tarafında geliştirme başlamadan önce daha net tasarım kararları alınmasının süreci hızlandıracağı fark edildi. Bir sonraki sprintte daha küçük ve net görevler belirlenerek ilerlemek, bağımlılıkları daha iyi yönetmek ve çalışan bir MVP odaklı ilerlemek süreci daha verimli hale getirecektir.Genel olarak ekip uyumu ve iletişimi başarılı ilerlemiştir.
 
-# **Teknik Mimari**
+# **Sprint 2**
 
-## **Teknoloji Yığını**
-- **Frontend:** Next.js 14, TypeScript, Vanilla CSS
-- **Backend:** FastAPI (Python), SQLAlchemy 2.0 (async)
-- **Yapay Zeka:** Google Gemini 1.5 Flash (LLM), Google `text-embedding-004` (embedding)
-- **Vektör DB:** Qdrant (semantik arama / RAG)
-- **İlişkisel DB:** PostgreSQL (kayıt yönetimi)
-- **Önbellek / Kuyruk:** Redis + Celery (arama önbelleği, embedding retry kuyruğu)
+Bu sprintte ürünün teknik temeli sıfırdan hayata geçirildi: kimlik doğrulama, dört problem
+çözme metodolojisi (Ishikawa, 8D, 5 Why, PDCA), yapay zeka destekli bilgi bankası ve bunları
+birbirine bağlayan uçtan uca bir REST API ile kullanıcı arayüzü tamamlandı. Aşağıda bu
+sprintte kurulan mimarinin ve geliştirme ortamının özeti yer almaktadır.
 
-## **Proje Yapısı**
+### - Teknoloji Yığını:
+
+| Katman | Teknoloji | Görevi |
+| --- | --- | --- |
+| **Frontend** | Next.js 14, TypeScript, Vanilla CSS | Kullanıcı arayüzü |
+| **Backend** | FastAPI (Python), SQLAlchemy 2.0 (async) | REST API ve iş mantığı |
+| **Yapay Zeka** | Google Gemini (LLM + embedding) | Takip sorusu üretimi, özetleme, semantik arama |
+| **Vektör Veritabanı** | Qdrant | RAG tabanlı benzer vaka araması |
+| **İlişkisel Veritabanı** | PostgreSQL | Kullanıcı, oturum ve kayıt yönetimi |
+| **Önbellek / Kuyruk** | Redis + Celery | Arama önbelleği, embedding yeniden deneme kuyruğu |
+
+### - Proje Yapısı:
+
 ```
 .
-├── backend/          # FastAPI uygulaması (app/{core,domain,api,services,infrastructure})
-├── frontend/          # Next.js 14 + TypeScript uygulaması
-├── docker-compose.yml # postgres, redis, qdrant, backend, frontend orkestrasyonu
-└── .env.example        # gerekli ortam değişkenlerinin şablonu
+├── backend/            # FastAPI uygulaması (app/{core,domain,api,services,infrastructure})
+├── frontend/            # Next.js 14 + TypeScript uygulaması
+├── docker-compose.yml   # postgres, redis, qdrant, backend, celery-worker, frontend orkestrasyonu
+└── .env.example          # gerekli ortam değişkenlerinin şablonu
 ```
 
-## **Geliştirme Ortamı Kurulumu**
+### - Geliştirme Ortamı Kurulumu:
 
 1. **Ön koşullar:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), Git.
 2. `.env.example` dosyasını `.env` olarak kopyalayın ve gerekli değerleri doldurun
    (özellikle `GEMINI_API_KEY`, `JWT_SECRET_KEY`).
-3. Tüm servisleri ayağa kaldırın:
+3. Tüm servisleri tek komutla ayağa kaldırın:
    ```bash
    docker compose up --build
    ```
 4. Servisler hazır olduğunda:
-   - Backend: http://localhost:8000 (health: `/health`, docs: `/docs`)
-   - Frontend: http://localhost:3000
-   - Qdrant: http://localhost:6333
-5. Backend testlerini çalıştırmak için (yerelde Python 3.11+ ile):
+   - Backend → http://localhost:8000 &nbsp;(health: `/health`, docs: `/docs`)
+   - Frontend → http://localhost:3000
+   - Qdrant → http://localhost:6333
+5. Backend testlerini yerelde çalıştırmak için (Python 3.11+ ile):
    ```bash
    cd backend
    pip install -r requirements-dev.txt
    pytest -v
    ```
-
-## **Branch / Katkı Akışı**
-Geliştirme, her özellik için ayrı bir `feature/*` branch'inde ilerler; branch'ler düzenli
-aralıklarla commit edilip origin'e push edilir. `main` branch'i her zaman stabil kalır —
-değişiklikler PR ile review edildikten sonra `main`'e alınır.
