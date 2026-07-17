@@ -51,6 +51,24 @@ services:
       qdrant:
         condition: service_started
 
+  celery-worker:
+    build:
+      context: ./backend
+    command: celery -A app.infrastructure.celery_app worker --loglevel=info
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://proby:proby@postgres:5432/proby
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
   frontend:
     build:
       context: ./frontend
