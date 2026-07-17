@@ -99,27 +99,20 @@ sprintte kurulan mimarinin ve geliştirme ortamının özeti yer almaktadır.
    ```
 
 ### - Sprint Review:
-Bu sprintte ürünün teknik iskeleti planlanandan çok daha somut bir noktaya taşındı: sadece
-mimari kararlar değil, çalışan ve test edilmiş bir sistem ortaya çıktı. Sistem, birbirinin
-üzerine inşa edilen beş ayrı branch/pull request ile adım adım hayata geçirildi. İlk
-aşamada backend (FastAPI) ve frontend (Next.js) proje iskeleti, Pydantic domain modelleri,
-PostgreSQL şeması (SQLAlchemy 2.0 + Alembic) ve tüm servisleri tek komutla ayağa kaldıran
-docker-compose orkestrasyonu kuruldu. Ardından JWT tabanlı kimlik doğrulama, rol bazlı
-yetkilendirme (RBAC), audit logging ve dört problem çözme metodolojisinin (Ishikawa, 8D,
-5 Why, PDCA) adım motorları ile oturum yönetimi (SessionService) geliştirildi. Üçüncü
-aşamada Google Gemini ile LLM ve embedding servisleri, Qdrant vektör deposu, RAG tabanlı
-semantik arama, Redis önbellekleme ve embedding üretimi için Celery yeniden deneme kuyruğu
-eklendi. Dördüncü aşamada kimlik doğrulama, oturum, bilgi bankası ve kayıt yönetimi uç
-noktalarını içeren REST API; rate limiting ve tüm hataları tutarlı bir formatta dönen
-merkezi hata yönetimi tamamlandı. Son olarak giriş/kayıt, yeni problem oluşturma, adım
-adım problem çözme oturumu ve bilgi bankasında arama sayfaları; ayrıca embedding kuyruğunu
-işleyen Celery worker servisi eklendi. Her branch küçük ve anlamlı commit'lerle ilerletildi,
-testlerle doğrulandı ve pull request olarak açılıp review sürecinden geçirilerek main'e
-alındı. Backend tarafında 96 otomatik testin tamamı başarıyla geçti, frontend derleme/
-typecheck/lint kontrollerinden hatasız çıktı ve sistem gerçek bir sunucu üzerinde ayağa
-kaldırılarak doğrulandı. Sprint hedeflerine büyük ölçüde ulaşıldı ve proje artık gerçek
-verilerle (Docker, PostgreSQL, Qdrant, Redis ve bir Gemini API anahtarı ile) uçtan uca
-denenmeye hazır durumda.
+Bu sprintte ürünün teknik iskeleti, sadece mimari kararların ötesine geçerek çalışan ve
+test edilmiş bir sisteme dönüştü. Geliştirme, birbirinin üzerine inşa edilen beş branch/pull
+request ile ilerledi: backend (FastAPI) ve frontend (Next.js) iskeleti, Pydantic domain
+modelleri, PostgreSQL şeması (SQLAlchemy 2.0 + Alembic) ve docker-compose orkestrasyonu;
+JWT kimlik doğrulama, RBAC, audit logging ve dört metodolojinin (Ishikawa, 8D, 5 Why, PDCA)
+adım motorları ile SessionService; Google Gemini tabanlı LLM/embedding servisleri, Qdrant,
+RAG semantik arama, Redis önbellekleme ve Celery yeniden deneme kuyruğu; auth/oturum/bilgi
+bankası/kayıt uç noktalarını içeren REST API, rate limiting ve merkezi hata yönetimi; son
+olarak giriş/kayıt, problem oturumu ve bilgi bankası arama sayfaları ile Celery worker.
+Her branch anlamlı commit'lerle ilerletildi, testlerle doğrulandı ve PR review'dan geçirilerek
+main'e alındı. Backend'de 96 test başarıyla geçti, frontend derleme/typecheck/lint hatasız
+tamamlandı ve sistem gerçek bir sunucuda ayağa kaldırılarak doğrulandı. Proje artık gerçek
+altyapı (Docker, PostgreSQL, Qdrant, Redis, bir Gemini API anahtarı) ile uçtan uca denenmeye
+hazır durumda.
 
 ### - Sprint Retrospective:
 Sprint verimli geçti; beş parçaya bölünmüş, birbirinin üzerine inşa edilen branch yapısı
