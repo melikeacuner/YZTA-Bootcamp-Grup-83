@@ -49,3 +49,47 @@ Bu sprintte projenin temel yapısı netleştirildi ve güçlü bir başlangıç 
 
 ### - Sprint Retrospective:
 Sprint genel olarak verimli geçti ancak bazı teknik konuların beklenenden daha karmaşık olduğu görüldü. Özellikle AI ve RAG tarafında daha fazla araştırma ihtiyacı ortaya çıktı. UI/UX tarafında geliştirme başlamadan önce daha net tasarım kararları alınmasının süreci hızlandıracağı fark edildi. Bir sonraki sprintte daha küçük ve net görevler belirlenerek ilerlemek, bağımlılıkları daha iyi yönetmek ve çalışan bir MVP odaklı ilerlemek süreci daha verimli hale getirecektir.Genel olarak ekip uyumu ve iletişimi başarılı ilerlemiştir.
+
+# **Teknik Mimari**
+
+## **Teknoloji Yığını**
+- **Frontend:** Next.js 14, TypeScript, Vanilla CSS
+- **Backend:** FastAPI (Python), SQLAlchemy 2.0 (async)
+- **Yapay Zeka:** Google Gemini 1.5 Flash (LLM), Google `text-embedding-004` (embedding)
+- **Vektör DB:** Qdrant (semantik arama / RAG)
+- **İlişkisel DB:** PostgreSQL (kayıt yönetimi)
+- **Önbellek / Kuyruk:** Redis + Celery (arama önbelleği, embedding retry kuyruğu)
+
+## **Proje Yapısı**
+```
+.
+├── backend/          # FastAPI uygulaması (app/{core,domain,api,services,infrastructure})
+├── frontend/          # Next.js 14 + TypeScript uygulaması
+├── docker-compose.yml # postgres, redis, qdrant, backend, frontend orkestrasyonu
+└── .env.example        # gerekli ortam değişkenlerinin şablonu
+```
+
+## **Geliştirme Ortamı Kurulumu**
+
+1. **Ön koşullar:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), Git.
+2. `.env.example` dosyasını `.env` olarak kopyalayın ve gerekli değerleri doldurun
+   (özellikle `GEMINI_API_KEY`, `JWT_SECRET_KEY`).
+3. Tüm servisleri ayağa kaldırın:
+   ```bash
+   docker compose up --build
+   ```
+4. Servisler hazır olduğunda:
+   - Backend: http://localhost:8000 (health: `/health`, docs: `/docs`)
+   - Frontend: http://localhost:3000
+   - Qdrant: http://localhost:6333
+5. Backend testlerini çalıştırmak için (yerelde Python 3.11+ ile):
+   ```bash
+   cd backend
+   pip install -r requirements-dev.txt
+   pytest -v
+   ```
+
+## **Branch / Katkı Akışı**
+Geliştirme, her özellik için ayrı bir `feature/*` branch'inde ilerler; branch'ler düzenli
+aralıklarla commit edilip origin'e push edilir. `main` branch'i her zaman stabil kalır —
+değişiklikler PR ile review edildikten sonra `main`'e alınır.
