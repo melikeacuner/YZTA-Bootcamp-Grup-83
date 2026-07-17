@@ -97,3 +97,48 @@ sprintte kurulan mimarinin ve geliştirme ortamının özeti yer almaktadır.
    pip install -r requirements-dev.txt
    pytest -v
    ```
+
+### - Neler Yaptık:
+
+Sprint boyunca ürün, birbirinin üzerine inşa edilen beş ayrı branch/pull request ile adım
+adım hayata geçirildi:
+
+- **feature/wave1-foundation** — Backend (FastAPI) ve frontend (Next.js) proje iskeleti,
+  Pydantic domain modelleri, PostgreSQL şeması (SQLAlchemy 2.0 + Alembic) ve tüm servisleri
+  tek komutla ayağa kaldıran docker-compose orkestrasyonu kuruldu.
+- **feature/wave2-auth-methodology** — JWT tabanlı kimlik doğrulama, rol bazlı yetkilendirme
+  (RBAC), audit logging ve dört problem çözme metodolojisinin (Ishikawa, 8D, 5 Why, PDCA)
+  adım motorları ile oturum yönetimi (SessionService) geliştirildi.
+- **feature/wave3-ai-rag** — Google Gemini ile LLM ve embedding servisleri, Qdrant vektör
+  deposu, RAG tabanlı semantik arama, Redis önbellekleme ve embedding üretimi için Celery
+  yeniden deneme kuyruğu eklendi.
+- **feature/wave4-api** — Kimlik doğrulama, oturum, bilgi bankası ve kayıt yönetimi uç
+  noktalarını içeren REST API; rate limiting ve tüm hataları tutarlı bir formatta dönen
+  merkezi hata yönetimi tamamlandı.
+- **feature/wave5-frontend-resilience** — Giriş/kayıt, yeni problem oluşturma, adım adım
+  problem çözme oturumu ve bilgi bankasında arama sayfaları; ayrıca embedding kuyruğunu
+  işleyen Celery worker servisi eklendi.
+
+Her branch küçük ve anlamlı commit'lerle ilerletildi, testlerle doğrulandı ve pull request
+olarak açılıp review sürecinden geçirilerek main'e alındı.
+
+### - Sprint Review:
+Bu sprintte ürünün teknik iskeleti planlanandan çok daha somut bir noktaya taşındı: sadece
+mimari kararlar değil, çalışan ve test edilmiş bir sistem ortaya çıktı. Kimlik doğrulama,
+dört metodoloji motoru, yapay zeka destekli RAG altyapısı, uçtan uca REST API ve bu API'yi
+kullanan bir arayüz tek sprintte hayata geçirildi. Backend tarafında 96 otomatik testin
+tamamı başarıyla geçti, frontend derleme/typecheck/lint kontrollerinden hatasız çıktı ve
+sistem gerçek bir sunucu üzerinde ayağa kaldırılarak doğrulandı. Sprint hedeflerine büyük
+ölçüde ulaşıldı ve proje artık gerçek verilerle (Docker, PostgreSQL, Qdrant, Redis ve bir
+Gemini API anahtarı ile) uçtan uca denenmeye hazır durumda.
+
+### - Sprint Retrospective:
+Sprint verimli geçti; beş parçaya bölünmüş, birbirinin üzerine inşa edilen branch yapısı
+işi yönetilebilir tutmayı ve her aşamayı ayrı ayrı test edip doğrulamayı kolaylaştırdı.
+Buna karşılık kullanılan bazı üçüncü parti bileşenlerin (ör. seçilen Gemini model adları)
+kısa sürede kullanımdan kalkması, bağımlılıkları düzenli kontrol etmenin önemini gösterdi.
+Ayrıca geliştirme ortamında karşılaşılan disk alanı kısıtı gibi altyapısal sorunlar, ortam
+hazırlığının sprint başında netleştirilmesi gerektiğini ortaya koydu. Bir sonraki sprintte
+gerçek bir Gemini API anahtarıyla uçtan uca doğrulama yapmak, Docker Compose ile tüm
+servisleri birlikte test etmek ve frontend tarafında kullanıcı deneyimini derinleştirmek
+öncelikli hedefler olacak.
