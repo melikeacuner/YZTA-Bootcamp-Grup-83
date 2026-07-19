@@ -1,6 +1,8 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
+
 
 from app.domain.enums import EmbeddingStatus
 from app.domain.validation import validate_lessons_learned, validate_problem_description
@@ -24,12 +26,14 @@ class KnowledgeService:
         session: AsyncSession,
         embedding_pipeline: EmbeddingPipeline,
         qdrant_repository: QdrantRepository,
+        rag_service: any = None,
     ) -> None:
         self._session = session
         self._records = ProblemRecordRepository(session)
         self._audit = AuditService(session)
         self._pipeline = embedding_pipeline
         self._qdrant_repository = qdrant_repository
+        self._rag_service = rag_service
 
     @staticmethod
     def _embedding_payload(record: ProblemRecordORM) -> dict:
@@ -54,21 +58,37 @@ class KnowledgeService:
         corrective_actions: str | None = None,
         industry: str | None = None,
         department: str | None = None,
+        problem_category: str | None = None,
+        severity: int = 1,
+        occurrence: int = 1,
+        detection: int = 1,
+        yokoten_applied: bool = False,
     ) -> ProblemRecordORM:
         validate_problem_description(problem_session.problem_description)
         validate_lessons_learned(lessons_learned)
 
         record = ProblemRecordORM(
             session_id=problem_session.id,
+            user_id=user_id,
             title=title,
             description=problem_session.problem_description,
             methodology=problem_session.methodology,
             industry=industry,
             department=department,
-            methodology_data=problem_session.step_data.get("answers", {}),
+            problem_category=problem_category,
+            methodology_data=problem_session.step_responses or problem_session.step_data.get("answers", {}),
+            step_responses=problem_session.step_responses or problem_session.step_data.get("answers", {}),
             root_cause=root_cause,
             corrective_actions=corrective_actions,
             lessons_learned=lessons_learned,
+            severity=severity,
+            occurrence=occurrence,
+            detection=detection,
+            rpn=severity * occurrence * detection,
+            yokoten_applied=yokoten_applied,
+            closure_checklist={"checklist": ["Oturum tamamlandı", "Rapor kaydedildi"]},
+            resolution_status="closed",
+            resolution_date=datetime.utcnow() if hasattr(self, "datetime") else func.now(),
             embedding_status=EmbeddingStatus.PENDING.value,
         )
         await self._records.create(record)
@@ -87,7 +107,18 @@ class KnowledgeService:
             EmbeddingStatus.COMPLETED.value if ok else EmbeddingStatus.FAILED.value
         )
         await self._session.flush()
+
+        # Export to Obsidian Vault
+        try:
+            from app.services.obsidian_service import ObsidianService
+            obsidian = ObsidianService(self._session, self._rag_service)
+            await obsidian.export_record(record.id)
+        except Exception as obs_err:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to export record to Obsidian: {obs_err}", exc_info=True)
+
         return record
+
 
     async def get(self, record_id: uuid.UUID) -> ProblemRecordORM:
         record = await self._records.get_by_id(record_id)
@@ -130,6 +161,16 @@ class KnowledgeService:
             after_state={"title": record.title, "lessons_learned": record.lessons_learned},
         )
         await self._session.flush()
+
+        # Export to Obsidian Vault
+        try:
+            from app.services.obsidian_service import ObsidianService
+            obsidian = ObsidianService(self._session, self._rag_service)
+            await obsidian.export_record(record.id)
+        except Exception as obs_err:
+            import logging
+            logging.getLogger(__name__).error(f"Failed to export record to Obsidian: {obs_err}", exc_info=True)
+
         return record
 
     async def delete(self, record_id: uuid.UUID, user_id: uuid.UUID) -> None:

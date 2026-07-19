@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-
-import { Navbar } from "@/components/Navbar";
 import { AuthProvider } from "@/lib/auth-context";
-
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Proby AI",
   description:
-    "Kurumsal problemleri sistematik metodolojiler ve yapay zeka destegiyle analiz eden bilgi yonetim platformu.",
+    "Kurumsal problemleri sistematik metodolojiler ve yapay zeka desteğiyle analiz eden bilgi yönetim platformu.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +13,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr">
       <body>
         <AuthProvider>
-          <Navbar />
           {children}
         </AuthProvider>
       </body>

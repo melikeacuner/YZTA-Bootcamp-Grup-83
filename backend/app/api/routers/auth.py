@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_auth_service
+from app.api.deps import get_auth_service, get_current_user
 from app.domain.api_envelope import APIResponse
 from app.domain.auth import TokenResponse, UserCreate, UserLogin, UserPublic
+from app.infrastructure.db.models import User
 from app.infrastructure.db.session import get_db_session
 from app.services.auth_service import AuthService
 
@@ -30,3 +31,10 @@ async def login(
     token = await service.authenticate(payload)
     await db.commit()
     return APIResponse.ok(token)
+
+
+@router.get("/me", response_model=APIResponse[UserPublic])
+async def get_me(
+    current_user: User = Depends(get_current_user),
+) -> APIResponse[UserPublic]:
+    return APIResponse.ok(UserPublic.model_validate(current_user))

@@ -61,10 +61,19 @@ def get_auth_service(db: AsyncSession = Depends(get_db_session)):
     return AuthService(db)
 
 
-def get_session_service(db: AsyncSession = Depends(get_db_session)):
+def get_llm_service():
+    from app.services.llm_service import LLMService
+
+    return LLMService()
+
+
+def get_session_service(
+    db: AsyncSession = Depends(get_db_session),
+    llm_service = Depends(get_llm_service)
+):
     from app.services.session_service import SessionService
 
-    return SessionService(db)
+    return SessionService(db, llm_service)
 
 
 def get_qdrant_repository():
@@ -105,3 +114,28 @@ def get_knowledge_service(
 
     pipeline = EmbeddingPipeline(embedding_service, qdrant_repository)
     return KnowledgeService(db, pipeline, qdrant_repository)
+
+
+def get_agent_service(
+    db: AsyncSession = Depends(get_db_session),
+    llm_service=Depends(get_llm_service),
+    embedding_service=Depends(get_embedding_service),
+    qdrant_repository=Depends(get_qdrant_repository),
+    rag_service=Depends(get_rag_service),
+):
+    from app.services.embedding_pipeline import EmbeddingPipeline
+    from app.services.agent_service import AgentService
+
+    pipeline = EmbeddingPipeline(embedding_service, qdrant_repository)
+    return AgentService(db, llm_service, pipeline, qdrant_repository, rag_service)
+
+
+def get_obsidian_service(
+    db: AsyncSession = Depends(get_db_session),
+    rag_service=Depends(get_rag_service),
+):
+    from app.services.obsidian_service import ObsidianService
+
+    return ObsidianService(db, rag_service)
+
+

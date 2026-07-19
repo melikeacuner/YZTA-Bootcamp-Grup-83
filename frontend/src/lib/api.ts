@@ -6,6 +6,8 @@ import type {
   SessionResponse,
   TokenResponse,
   UserPublic,
+  DashboardStats,
+  TaskResponse,
 } from "./types";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -19,7 +21,7 @@ export interface ApiEnvelope<T> {
 
 export class ApiError extends Error {
   constructor(
-    message: string,
+    public message: string,
     public status: number,
   ) {
     super(message);
@@ -70,6 +72,11 @@ export function loginUser(email: string, password: string): Promise<TokenRespons
   });
 }
 
+export function getMe(token: string): Promise<UserPublic> {
+  return request<UserPublic>("/auth/me", { token });
+}
+
+
 export function createSession(
   token: string,
   methodology: MethodologyType,
@@ -80,6 +87,10 @@ export function createSession(
     token,
     body: JSON.stringify({ methodology, problem_description: problemDescription }),
   });
+}
+
+export function listSessions(token: string): Promise<SessionResponse[]> {
+  return request<SessionResponse[]>("/sessions", { token });
 }
 
 export function getSession(token: string, sessionId: string): Promise<SessionResponse> {
@@ -120,6 +131,11 @@ export function createRecord(
     corrective_actions?: string;
     industry?: string;
     department?: string;
+    problem_category?: string;
+    severity?: number;
+    occurrence?: number;
+    detection?: number;
+    yokoten_applied?: boolean;
   },
 ): Promise<RecordResponse> {
   return request<RecordResponse>("/records", {
@@ -137,6 +153,10 @@ export function listRecords(
   return request<PaginatedRecords>(`/records?page=${page}&page_size=${pageSize}`, { token });
 }
 
+export function getRecord(token: string, recordId: string): Promise<RecordResponse> {
+  return request<RecordResponse>(`/records/${recordId}`, { token });
+}
+
 export function searchKnowledge(
   token: string,
   query: string,
@@ -144,4 +164,125 @@ export function searchKnowledge(
 ): Promise<KnowledgeSearchResult[]> {
   const params = new URLSearchParams({ q: query, ...filters });
   return request<KnowledgeSearchResult[]>(`/knowledge/search?${params.toString()}`, { token });
+}
+
+// --- Dashboard & Task APIs ---
+
+export function getDashboardStats(token: string): Promise<DashboardStats> {
+  return request<DashboardStats>("/dashboard/stats", { token });
+}
+
+export function listTasks(
+  token: string,
+  filters: { problem_record_id?: string; session_id?: string; status?: string } = {},
+): Promise<TaskResponse[]> {
+  const cleanFilters: Record<string, string> = {};
+  if (filters.problem_record_id) cleanFilters.problem_record_id = filters.problem_record_id;
+  if (filters.session_id) cleanFilters.session_id = filters.session_id;
+  if (filters.status) cleanFilters.status = filters.status;
+
+  const params = new URLSearchParams(cleanFilters);
+  return request<TaskResponse[]>(`/tasks?${params.toString()}`, { token });
+}
+
+export function createTask(
+  token: string,
+  payload: {
+    problem_record_id?: string | null;
+    session_id?: string | null;
+    title: string;
+    description?: string;
+    assignee_name?: string;
+    deadline?: string;
+  },
+): Promise<any> {
+  return request<any>("/tasks", {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateTask(
+  token: string,
+  taskId: string,
+  payload: {
+    title?: string;
+    description?: string;
+    assignee_name?: string;
+    deadline?: string;
+    status?: string;
+    proof_description?: string;
+    proof_url?: string;
+  },
+): Promise<any> {
+  return request<any>(`/tasks/${taskId}`, {
+    method: "PUT",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteTask(token: string, taskId: string): Promise<any> {
+  return request<any>(`/tasks/${taskId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+// --- AI Agent Chat APIs ---
+
+export function agentChat(token: string, sessionId: string, message: string): Promise<{ reply: string }> {
+  return request<{ reply: string }>(`/sessions/${sessionId}/agent-chat`, {
+    method: "POST",
+    token,
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function agentResolve(token: string, sessionId: string): Promise<{ record_id: string; message: string }> {
+  return request<{ record_id: string; message: string }>(`/sessions/${sessionId}/agent-resolve`, {
+    method: "POST",
+    token,
+  });
+}
+
+export function updateSession(
+  token: string,
+  sessionId: string,
+  payload: {
+    assignee_name?: string | null;
+    tracker_name?: string | null;
+    department?: string | null;
+    summary?: string | null;
+    tags?: string[] | null;
+  },
+): Promise<SessionResponse> {
+  return request<SessionResponse>(`/sessions/${sessionId}`, {
+    method: "PUT",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function poolChat(
+  token: string,
+  sessionId: string,
+  message: string,
+): Promise<SessionResponse> {
+  return request<SessionResponse>(`/sessions/${sessionId}/resolve-chat`, {
+    method: "POST",
+    token,
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function closePoolSession(
+  token: string,
+  sessionId: string,
+): Promise<{ message: string; record_id: string }> {
+  return request<{ message: string; record_id: string }>(`/sessions/${sessionId}/pool-close`, {
+    method: "POST",
+    token,
+  });
 }

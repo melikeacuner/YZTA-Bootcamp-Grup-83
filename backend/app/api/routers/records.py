@@ -1,5 +1,6 @@
 import uuid
-
+from datetime import datetime
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,39 +23,60 @@ class CreateRecordRequest(BaseModel):
     session_id: uuid.UUID
     title: str = Field(min_length=1, max_length=200)
     lessons_learned: str
-    root_cause: str | None = None
-    corrective_actions: str | None = None
-    industry: str | None = None
-    department: str | None = None
+    root_cause: Optional[str] = None
+    corrective_actions: Optional[str] = None
+    industry: Optional[str] = None
+    department: Optional[str] = None
+    problem_category: Optional[str] = None
+    severity: Optional[int] = 1
+    occurrence: Optional[int] = 1
+    detection: Optional[int] = 1
+    yokoten_applied: Optional[bool] = False
 
 
 class UpdateRecordRequest(BaseModel):
-    title: str | None = None
-    lessons_learned: str | None = None
-    root_cause: str | None = None
-    corrective_actions: str | None = None
-    industry: str | None = None
-    department: str | None = None
+    title: Optional[str] = None
+    lessons_learned: Optional[str] = None
+    root_cause: Optional[str] = None
+    corrective_actions: Optional[str] = None
+    industry: Optional[str] = None
+    department: Optional[str] = None
+    problem_category: Optional[str] = None
+    severity: Optional[int] = None
+    occurrence: Optional[int] = None
+    detection: Optional[int] = None
+    yokoten_applied: Optional[bool] = None
 
 
 class RecordResponse(BaseModel):
     id: uuid.UUID
     session_id: uuid.UUID
+    user_id: uuid.UUID
     title: str
     description: str
     methodology: str
-    industry: str | None
-    department: str | None
-    root_cause: str | None
-    corrective_actions: str | None
+    industry: Optional[str] = None
+    department: Optional[str] = None
+    problem_category: Optional[str] = None
+    root_cause: Optional[str] = None
+    corrective_actions: Optional[str] = None
     lessons_learned: str
     embedding_status: str
+    severity: Optional[int] = 1
+    occurrence: Optional[int] = 1
+    detection: Optional[int] = 1
+    rpn: Optional[int] = 1
+    yokoten_applied: Optional[bool] = False
+    closure_checklist: Optional[dict] = None
+    resolution_status: str
+    created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
 
 class PaginatedRecords(BaseModel):
-    items: list[RecordResponse]
+    items: List[RecordResponse]
     total: int
     page: int
     page_size: int
@@ -85,6 +107,11 @@ async def create_record(
         corrective_actions=payload.corrective_actions,
         industry=payload.industry,
         department=payload.department,
+        problem_category=payload.problem_category,
+        severity=payload.severity or 1,
+        occurrence=payload.occurrence or 1,
+        detection=payload.detection or 1,
+        yokoten_applied=payload.yokoten_applied or False,
     )
     await db.commit()
     return APIResponse.ok(RecordResponse.model_validate(record))
@@ -125,11 +152,12 @@ async def get_record(
 async def update_record(
     record_id: uuid.UUID,
     payload: UpdateRecordRequest,
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
     service: KnowledgeService = Depends(get_knowledge_service),
     db: AsyncSession = Depends(get_db_session),
 ) -> APIResponse[RecordResponse]:
-    record = await service.update(record_id, current_user.id, **payload.model_dump())
+    # Users can update their own or we check admin, but since user approved we allow standard auth user to edit their records
+    record = await service.update(record_id, current_user.id, **payload.model_dump(exclude_unset=True))
     await db.commit()
     return APIResponse.ok(RecordResponse.model_validate(record))
 

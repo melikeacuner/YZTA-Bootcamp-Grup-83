@@ -1,57 +1,33 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-
-import { fetchHealth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import Dashboard from "@/components/dashboard";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
-  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
-  const { token } = useAuth();
+  const { token, isLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    fetchHealth()
-      .then(() => setBackendOnline(true))
-      .catch(() => setBackendOnline(false));
-  }, []);
+    if (!isLoading && !token) {
+      router.push("/login");
+    }
+  }, [token, isLoading, router]);
 
-  return (
-    <main>
-      <section className="card stack">
-        <div>
-          <h1>Proby AI</h1>
-          <p>
-            Kurumsal problemleri Ishikawa, 8D, 5 Why ve PDCA metodolojileriyle analiz eden,
-            çözümleri kurumsal bilgi bankasına dönüştüren platform.
-          </p>
-          <p className="badge">
-            <span className={`badge-dot${backendOnline ? "" : " offline"}`} />
-            {backendOnline === null
-              ? "Backend durumu kontrol ediliyor..."
-              : backendOnline
-                ? "Backend calisiyor"
-                : "Backend'e ulasilamiyor"}
-          </p>
-        </div>
+  if (isLoading) {
+    return (
+      <div className="w-screen h-screen flex flex-col items-center justify-center bg-[#030a10] text-[#80deea]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#00e5ff]" />
+        <p className="text-xs font-mono mt-3">Proby AI Yükleniyor...</p>
+      </div>
+    );
+  }
 
-        <div className="row">
-          {token ? (
-            <>
-              <Link className="button" href="/session/new">
-                Yeni Problem Baslat
-              </Link>
-              <Link className="button button-secondary" href="/knowledge">
-                Bilgi Bankasinda Ara
-              </Link>
-            </>
-          ) : (
-            <Link className="button" href="/login">
-              Giris Yap / Kayit Ol
-            </Link>
-          )}
-        </div>
-      </section>
-    </main>
-  );
+  if (!token) {
+    return null; // Will redirect via useEffect
+  }
+
+  return <Dashboard />;
 }

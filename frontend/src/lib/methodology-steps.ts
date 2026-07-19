@@ -38,9 +38,11 @@ export const METHODOLOGY_STEPS: Record<MethodologyType, StepDefinition[]> = {
   ],
 };
 
+
 export const MIN_STEPS_TO_COMPLETE: Record<MethodologyType, number> = {
   ishikawa: 6,
   "8d": 8,
   "5why": 3,
   pdca: 4,
 };
+

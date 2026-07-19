@@ -6,6 +6,8 @@ class MethodologyType(str, Enum):
     EIGHT_D = "8d"
     FIVE_WHY = "5why"
     PDCA = "pdca"
+    AGENT = "agent"
+
 
 
 class SessionStatus(str, Enum):
