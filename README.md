@@ -58,6 +58,13 @@ Bu sprintte ürünün teknik temeli sıfırdan hayata geçirildi: kimlik doğrul
 birbirine bağlayan uçtan uca bir REST API ile kullanıcı arayüzü tamamlandı. Aşağıda bu
 sprintte kurulan mimarinin ve geliştirme ortamının özeti yer almaktadır.
 
+### - Daily Scrum:
+Konuşma ScreenShotları :
+https://imgur.com/a/sprint-2-G37nYoA
+
+### - Sprint board update: Sprint board screenshot:
+<img width="795" height="897" alt="clickUP" src="https://github.com/user-attachments/assets/c7df66c7-9c83-4aec-902f-a881621545ce" />
+
 ### - Teknoloji Yığını:
 
 | Katman | Teknoloji | Görevi |
