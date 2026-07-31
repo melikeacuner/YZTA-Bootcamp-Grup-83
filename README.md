@@ -143,7 +143,7 @@ servisleri birlikte test etmek ve frontend tarafında kullanıcı deneyimini der
 
 
 ### - Backlog düzeni ve Story seçimleri:
-
+Bu backlog, projenin final ürün haline getirilmesini temel alacak şekilde hazırlanmıştır. Görevler, sprint başına belirlenen puan sınırını aşmayacak şekilde dengeli olarak dağıtılmıştır. ClickUp üzerinde gri item’lar yapılacak işleri, mavi item’lar devam eden işleri ve yeşil item’lar tamamlanan işleri temsil etmektedir. Sprint sonlarındaki günler, ekibin dinlenmesi amacıyla planlı olarak boş bırakılmıştır. Proje kapsamında toplam 300 puanlık bir backlog belirlenmiş ve bu yük 3 sprinte bölünerek her sprintin 100 puan olacak şekilde ilerlemesi kararlaştırılmıştır. Ayrıca, user story’ler product backlog’lar içerisinde yer almakta olup, ilgili backlog item’lara tıklanarak hikayelerin detaylarına ulaşılabilmektedir.
 
 ### - Daily Scrum:
 
