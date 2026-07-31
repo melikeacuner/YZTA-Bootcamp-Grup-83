@@ -1,0 +1,55 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "path:Problems",
+      "color": {
+        "a": 1,
+        "rgb": 14717183
+      }
+    },
+    {
+      "query": "path:Departments",
+      "color": {
+        "a": 1,
+        "rgb": 5831512
+      }
+    },
+    {
+      "query": "path:Methodologies",
+      "color": {
+        "a": 1,
+        "rgb": 3828351
+      }
+    },
+    {
+      "query": "path:Tasks",
+      "color": {
+        "a": 1,
+        "rgb": 15024220
+      }
+    },
+    {
+      "query": "path:Tags",
+      "color": {
+        "a": 1,
+        "rgb": 10243550
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0.0,
+  "nodeSizeMultiplier": 1.5,
+  "lineThicknessMultiplier": 1.2,
+  "forceMultiplier": 1.0,
+  "linkDistanceMultiplier": 1.0,
+  "centerStrength": 0.5,
+  "repelStrength": 12.0
+}

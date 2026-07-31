@@ -1,0 +1,268 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Modern Deep Ocean / Neon Tech Theme variables */
+:root {
+  --color-bg: #030a10;
+  --color-surface: #061320;
+  --color-surface-hover: #0a1f33;
+  --color-surface-active: #0d2842;
+  --color-border: #10293f;
+  --color-border-hover: #194063;
+
+  /* Neon Cyber Colors */
+  --color-accent: #00e5ff; /* Cyber Cyan */
+  --color-accent-hover: #80f2ff;
+  --color-accent-purple: #7c4dff; /* Cyber Violet */
+  --color-accent-glow: rgba(0, 229, 255, 0.25);
+  --color-accent-subtle: rgba(0, 229, 255, 0.06);
+
+  /* Warm White / Teal Text */
+  --color-text-primary: #e0f7fa;
+  --color-text-secondary: #80deea;
+  --color-text-muted: #4f7b92;
+
+  /* Status Colors */
+  --color-success: #00e676; /* Neon Green */
+  --color-success-bg: rgba(0, 230, 118, 0.08);
+  --color-warning: #ffea00; /* Neon Yellow */
+  --color-warning-bg: rgba(255, 234, 0, 0.08);
+  --color-danger: #ff1744; /* Neon Red */
+  --color-danger-bg: rgba(255, 23, 68, 0.08);
+  --color-info: #00b0ff;
+  --color-info-bg: rgba(0, 176, 255, 0.08);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+/* Thin cyber scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(6, 19, 32, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+}
+
+/* Accent Glow Effect */
+.glow-border {
+  position: relative;
+}
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-purple));
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.glow-border:hover::after {
+  opacity: 1;
+}
+
+/* Custom styles for inputs */
+input, textarea, select {
+  background: rgba(3, 10, 16, 0.6);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 10px 14px;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+}
+
+/* Custom buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-purple));
+  color: #030a10;
+  box-shadow: 0 4px 14px rgba(0, 229, 255, 0.2);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #33ebff, #9670ff);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.3);
+}
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+.btn-secondary:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+  color: var(--color-accent);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.dot-pulse {
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+/* --- Print & PDF Export Rules (A4 Paper Fit) --- */
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  html, body {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .no-print, 
+  nav, 
+  header, 
+  aside, 
+  button, 
+  .no-print-area {
+    display: none !important;
+  }
+
+  .print-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 4px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  .print-container * {
+    color: #111827 !important;
+    background-color: transparent !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .print-container h2,
+  .print-container h3,
+  .print-container h4 {
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .print-container p,
+  .print-container span,
+  .print-container li {
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  .print-container .grid {
+    gap: 4px !important;
+  }
+
+  .print-container .bg-\[\#030a10\], 
+  .print-container .bg-\[\#061320\], 
+  .print-container .bg-\[\#0a1f33\],
+  .print-container .bg-cyan-950\/20,
+  .print-container .bg-emerald-950\/20,
+  .print-container .bg-purple-950\/20,
+  .print-container .bg-amber-950\/20 {
+    background-color: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 6px 8px !important;
+    margin-bottom: 4px !important;
+    border-radius: 4px !important;
+  }
+}
+
+
+
