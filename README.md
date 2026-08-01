@@ -140,7 +140,11 @@ servisleri birlikte test etmek ve frontend tarafında kullanıcı deneyimini der
 öncelikli hedefler olacak.
 
 # **Sprint 3**
-
+- Bu sprint projenin son sprinti olarak tamamlandı
+- 2 haftalık süreçte yoğun ve odaklı çalışma yapıldı
+- Tüm kritik feature'lar başarıyla yetiştirildi
+- Ürün demo ve sunum için hazır hale getirildi
+- MVP'nin ötesine geçilerek gelişmiş bir sistem ortaya çıkarıldı
 
 ### - Backlog düzeni ve Story seçimleri:
 Bu backlog, projenin final ürün haline getirilmesini temel alacak şekilde hazırlanmıştır. Görevler, sprint başına belirlenen puan sınırını aşmayacak şekilde dengeli olarak dağıtılmıştır. ClickUp üzerinde gri item’lar yapılacak işleri, mavi item’lar devam eden işleri ve yeşil item’lar tamamlanan işleri temsil etmektedir. Sprint sonlarındaki günler, ekibin dinlenmesi amacıyla planlı olarak boş bırakılmıştır. Proje kapsamında toplam 300 puanlık bir backlog belirlenmiş ve bu yük 3 sprinte bölünerek her sprintin 100 puan olacak şekilde ilerlemesi kararlaştırılmıştır. Ayrıca, user story’ler product backlog’lar içerisinde yer almakta olup, ilgili backlog item’lara tıklanarak hikayelerin detaylarına ulaşılabilmektedir.
@@ -150,7 +154,7 @@ Konuşma ScreenShotları :
 https://imgur.com/a/fU7I5BC
 
 ### - Sprint board update: Sprint board screenshot:
-<img width="1600" height="795" alt="f1725e6c-658f-40ae-8667-4b02c0d0f3cc" src="https://github.com/user-attachments/assets/1cf1c319-7053-4080-b9b5-c5d8af26102f" />
+
 
 
 ### - Ürün Durumu: Ekran görüntüleri : 
@@ -159,6 +163,9 @@ https://imgur.com/a/fU7I5BC
 <img width="1600" height="796" alt="2b101193-5872-43d8-89fa-221d00ba1ba5" src="https://github.com/user-attachments/assets/2b82e6f7-dc0c-4479-8730-a135e4892000" />
 <img width="1600" height="796" alt="2ef0d510-9cdf-4f74-bcc7-a4baedfda71f" src="https://github.com/user-attachments/assets/d13e36e4-b4ba-414a-b0bf-7292dd700122" />
 <img width="1600" height="795" alt="42f4c245-87a2-4288-af36-ad627a42c222" src="https://github.com/user-attachments/assets/ed6563d7-d89c-4bc6-93ed-cd89ddc9d2c5" />
+<img width="1600" height="795" alt="f1725e6c-658f-40ae-8667-4b02c0d0f3cc" src="https://github.com/user-attachments/assets/0c125232-ff3d-49ea-8f48-3e9b66f097ad" />
+
+
 
 ### - Sprint Review: 
 - AI Agent (Advisor) entegrasyonu tamamlandı ve aktif hale getirildi
