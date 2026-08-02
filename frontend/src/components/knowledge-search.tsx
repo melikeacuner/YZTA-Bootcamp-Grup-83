@@ -62,7 +62,7 @@ export default function KnowledgeSearch() {
 
     try {
       const data = await searchKnowledge(token, qVal, filters);
-      setResults(data);
+      setResults(qVal.trim() ? data.filter((r) => (r.score ?? 0) >= 0.65) : data);
     } catch (err: any) {
       console.error("Semantic search error:", err);
       setError("Bilgi bankası araması gerçekleştirilemedi.");

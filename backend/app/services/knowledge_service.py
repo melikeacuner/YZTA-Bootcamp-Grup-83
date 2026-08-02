@@ -567,25 +567,25 @@ class KnowledgeService:
 
         # 2. If vector RAG returned no results, fallback to DB keyword matching
         if not relevant_docs:
-            db_records, _ = await self.list_paginated(page=1, page_size=50)
-            query_tokens = [t.lower() for t in query.split() if len(t) > 2]
+            stopwords = {"bir", "bu", "şu", "o", "ve", "veya", "ile", "için", "gibi", "kadar", "daha", "böyle", "sadece", "fakat", "lakin", "ama", "çok", "evet", "hayır", "şey", "her", "tüm", "hep", "nasıl", "neden", "niçin", "hangi", "nerede"}
+            query_tokens = [t.lower() for t in query.split() if len(t) > 2 and t.lower() not in stopwords]
             
-            for r in db_records:
-                if department and r.department and department != "Tüm Şirket" and r.department != department:
-                    continue
-                
-                text_corpus = f"{r.title} {r.description} {r.root_cause} {r.lessons_learned} {' '.join(r.tags or [])}".lower()
-                if query_tokens and not any(t in text_corpus for t in query_tokens):
-                    continue
-
-                relevant_docs.append({
-                    "id": str(r.id),
-                    "title": r.title,
-                    "department": r.department or "Genel",
-                    "root_cause": r.root_cause or "Kök neden tespiti yapıldı.",
-                    "lessons_learned": r.lessons_learned or "Düzeltici faaliyet uygulandı.",
-                    "industry": r.industry or "İmalat"
-                })
+            if query_tokens:
+                db_records, _ = await self.list_paginated(page=1, page_size=50)
+                for r in db_records:
+                    if department and r.department and department != "Tüm Şirket" and r.department != department:
+                        continue
+                    
+                    text_corpus = f"{r.title} {r.description} {r.root_cause} {r.lessons_learned} {' '.join(r.tags or [])}".lower()
+                    if any(t in text_corpus for t in query_tokens):
+                        relevant_docs.append({
+                            "id": str(r.id),
+                            "title": r.title,
+                            "department": r.department or "Genel",
+                            "root_cause": r.root_cause or "Kök neden tespiti yapıldı.",
+                            "lessons_learned": r.lessons_learned or "Düzeltici faaliyet uygulandı.",
+                            "industry": r.industry or "İmalat"
+                        })
 
         if not relevant_docs:
             return {

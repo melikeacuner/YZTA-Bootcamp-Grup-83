@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     embedding_dimension: int = Field(default=3072)
     llm_timeout_seconds: float = Field(default=15.0)
 
-    rag_similarity_threshold: float = Field(default=0.2)
+    rag_similarity_threshold: float = Field(default=0.65)
     rag_max_results: int = Field(default=10)
     search_cache_ttl_seconds: int = Field(default=300)
 

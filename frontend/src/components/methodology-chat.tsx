@@ -10,11 +10,13 @@ import {
   completeSession,
   createRecord,
   agentResolve,
-  agentChat
+  agentChat,
+  searchKnowledge
 } from "@/lib/api";
 import { METHODOLOGY_STEPS, MIN_STEPS_TO_COMPLETE } from "@/lib/methodology-steps";
-import { METHODOLOGY_LABELS, SessionResponse } from "@/lib/types";
+import { METHODOLOGY_LABELS, SessionResponse, KnowledgeSearchResult } from "@/lib/types";
 import { AlertCircle, HelpCircle, ArrowLeft, ArrowRight, Loader2, Sparkles, X, CheckCircle, FileText, Globe } from "lucide-react";
+import UnifiedRecordDetail from "./unified-record-detail";
 
 interface MethodologyChatProps {
   sessionId: string;
@@ -97,6 +99,29 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
   const [confirmedAssignee, setConfirmedAssignee] = useState("");
   const [confirmedStatus, setConfirmedStatus] = useState<"todo" | "in_progress">("todo");
   const [statusGuardError, setStatusGuardError] = useState<string | null>(null);
+
+  // Dynamic RAG Similar Records & Modal Preview
+  const [similarRecords, setSimilarRecords] = useState<KnowledgeSearchResult[]>([]);
+  const [previewRecordId, setPreviewRecordId] = useState<string | null>(null);
+
+  // Dynamic RAG search during methodology chat
+  useEffect(() => {
+    if (!token || !session) return;
+    const synthesizedRoot = session.step_data?.ai_synthesized_root_cause || session.ai_synthesized_root_cause;
+    const queryText = synthesizedRoot || rootCause || session.problem_description;
+    if (!queryText || queryText.trim().length < 5) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchKnowledge(token, queryText);
+        setSimilarRecords(results.filter(r => (r.score ?? 0) >= 0.65).slice(0, 3));
+      } catch (err) {
+        console.error("Failed to fetch similar records during methodology chat:", err);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [token, session, rootCause]);
 
   const handleAddTag = () => {
     if (!newTagInput.trim()) return;
@@ -700,8 +725,8 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
 
           {/* Modal: Root Cause Confirmation & Task Creation */}
           {showConfirmModal && (
-            <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in overflow-y-auto">
-              <div className="w-full max-w-2xl bg-[#061320] border border-[#10293f] rounded-2xl overflow-hidden shadow-2xl relative space-y-4 p-6 my-8">
+            <div className="fixed inset-0 bg-[#030a10]/92 modal-backdrop-smooth gpu-accelerate flex items-center justify-center p-4 z-50 animate-fade-in overflow-y-auto">
+              <div className="w-full max-w-2xl bg-[#061320] border border-[#10293f] rounded-2xl overflow-hidden shadow-2xl relative space-y-4 p-6 my-8 gpu-accelerate">
                 <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
 
                 <div className="flex items-center justify-between border-b border-[#10293f] pb-3">
@@ -1088,13 +1113,86 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
               </button>
             </form>
           ) : (
-            <div className="p-5 bg-[#061320] border border-[#10293f] rounded-xl text-center text-xs text-[#4f7b92] leading-relaxed">
-              <HelpCircle size={22} className="mx-auto text-cyan-500/50 mb-2" />
-              Süreç içerisindeki tüm adımları doldurduğunuzda A3 Raporunu kaydetme seçeneği açılacaktır.
+            <div className="p-4 bg-[#061320] border border-[#10293f] rounded-xl space-y-3 shadow-lg relative overflow-hidden animate-fade-in">
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
+
+              <h3 className="text-xs font-bold text-[#80deea] flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <HelpCircle size={15} className="text-[#00e5ff]" />
+                  <span>Dinamik Benzer Vakalar (RAG AI)</span>
+                </span>
+                {similarRecords.length > 0 && (
+                  <span className="text-[9px] bg-cyan-500/10 text-[#00e5ff] px-2 py-0.5 rounded font-mono border border-cyan-500/20">
+                    {similarRecords.length} Eşleşme
+                  </span>
+                )}
+              </h3>
+
+              {similarRecords.length === 0 ? (
+                <p className="text-[11px] text-[#4f7b92] leading-relaxed italic">
+                  Sohbet ilerledikçe ve kök neden netleştikçe, kurumsal hafızadan eşleşen geçmiş vakalar burada canlı belirecektir.
+                </p>
+              ) : (
+                <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-0.5">
+                  <p className="text-[10px] text-cyan-400 font-medium">Eşleşen Benzer Geçmiş Vakalar:</p>
+                  {similarRecords.map((rec) => (
+                    <div
+                      key={rec.id}
+                      onClick={() => setPreviewRecordId(rec.id)}
+                      className="p-3 bg-[#030a10] border border-[#10293f] rounded-lg hover:border-[#00e5ff] hover:bg-[#061320] transition-all cursor-pointer group space-y-1.5"
+                    >
+                      <div className="flex justify-between items-start gap-1">
+                        <h4 className="text-[11px] font-semibold text-[#e0f7fa] group-hover:text-[#00e5ff] transition-colors truncate">
+                          {rec.title || "Başlıksız Kayıt"}
+                        </h4>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950/60 text-[#00e5ff] border border-cyan-500/30 font-mono shrink-0">
+                          %{rec.score ? (rec.score * 100).toFixed(0) : "0"}
+                        </span>
+                      </div>
+                      {rec.root_cause && (
+                        <p className="text-[10px] text-[#80deea] line-clamp-2 bg-[#061320] p-1.5 rounded border border-[#10293f]/40 leading-snug">
+                          <strong className="text-[#00e5ff]">Kök Neden:</strong> {rec.root_cause}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-[9px] text-[#4f7b92] pt-1 border-t border-[#10293f]/40">
+                        <span>Birim: {rec.department || "Genel"}</span>
+                        <span className="text-[#00e5ff] font-medium flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform font-mono">
+                          <span>İncele</span>
+                          <ArrowRight size={10} />
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal for viewing clicked similar record */}
+      {previewRecordId && (
+        <div className="fixed inset-0 bg-[#030a10]/92 modal-backdrop-smooth gpu-accelerate z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-5xl max-h-[90vh] bg-[#061320] border border-[#10293f] rounded-2xl flex flex-col overflow-hidden shadow-2xl relative p-4 gpu-accelerate">
+            <div className="flex justify-between items-center pb-2 border-b border-[#10293f] bg-[#030a10] px-3 py-1.5 rounded-t-xl">
+              <span className="text-xs font-bold text-[#80deea] flex items-center gap-2 font-mono">
+                <Sparkles className="w-4 h-4 text-[#00e5ff] animate-pulse" />
+                <span>Geçmiş Benzer Vaka Detaylı İnceleme</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setPreviewRecordId(null)}
+                className="p-1 text-[#4f7b92] hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-2">
+              <UnifiedRecordDetail recordId={previewRecordId} onClose={() => setPreviewRecordId(null)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

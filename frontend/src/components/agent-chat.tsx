@@ -29,11 +29,7 @@ export default function AgentChat({ sessionId, onFinalized, onViewReport }: Agen
   const [previewRecordId, setPreviewRecordId] = useState<string | null>(null);
 
   function handleRecordClick(recordId: string) {
-    if (onViewReport) {
-      onViewReport(recordId);
-    } else {
-      setPreviewRecordId(recordId);
-    }
+    setPreviewRecordId(recordId);
   }
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -74,7 +70,7 @@ export default function AgentChat({ sessionId, onFinalized, onViewReport }: Agen
     const timer = setTimeout(async () => {
       try {
         const res = await searchKnowledge(token, queryText);
-        setSimilarRecords(res.slice(0, 3));
+        setSimilarRecords(res.filter(r => (r.score ?? 0) >= 0.65).slice(0, 3));
       } catch (err) {
         console.error("Dynamic semantic search failed:", err);
       }
@@ -152,8 +148,8 @@ export default function AgentChat({ sessionId, onFinalized, onViewReport }: Agen
     <div className="flex-1 flex flex-col h-full overflow-hidden max-w-6xl mx-auto w-full animate-fade-in gap-4 relative">
       {/* Modal for viewing clicked similar record */}
       {previewRecordId && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="w-full max-w-4xl max-h-[90vh] bg-[#061320] border border-[#10293f] rounded-2xl flex flex-col overflow-hidden shadow-2xl p-4">
+        <div className="fixed inset-0 bg-[#030a10]/92 modal-backdrop-smooth gpu-accelerate flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="w-full max-w-4xl max-h-[90vh] bg-[#061320] border border-[#10293f] rounded-2xl flex flex-col overflow-hidden shadow-2xl p-4 gpu-accelerate">
             <div className="flex justify-end pb-2">
               <button 
                 onClick={() => setPreviewRecordId(null)}

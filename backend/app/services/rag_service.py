@@ -73,14 +73,6 @@ class RAGSearchService:
                 score_threshold=self._settings.rag_similarity_threshold,
                 query_filter=query_filter,
             )
-            if not results:
-                # Retry with soft threshold if strict threshold filtered all points
-                results = self._qdrant_repository.search(
-                    vector=vector,
-                    limit=self._settings.rag_max_results,
-                    score_threshold=0.1,
-                    query_filter=query_filter,
-                )
             payloads = [self._to_dict(point) for point in results]
         except (EmbeddingUnavailableError, QdrantUnavailableError) as exc:
             raise DegradedModeError(str(exc)) from exc

@@ -1,5 +1,5 @@
 ---
-id: 4acc80bc-079a-4a03-b00c-184b66e88acc
+id: 4009cc45-fea3-474c-a664-9c743d7c6bab
 title: "Yeni Baslik"
 department: "Diğer"
 methodology: "pdca"
@@ -13,7 +13,7 @@ tracker: "Atanmamış"
 tags:
   - kök-neden-bulundu
 yokoten_applied: false
-created_at: "2026-08-02T15:16:45"
+created_at: "2026-08-02T20:25:58"
 closed_at: ""
 created_by: "Kullanici"
 ---
@@ -26,7 +26,7 @@ Uretim hattinda tekrarlayan duraksama sorunu yasaniyor test icin.
 ## 👥 Atamalar & Tarihler
 - **Sorumlu (Assignee):** Atanmamış
 - **Denetçi (Tracker):** Atanmamış
-- **Açılış Tarihi:** 02.08.2026 15:16
+- **Açılış Tarihi:** 02.08.2026 20:25
 - **Kapanış Tarihi:** Açık
 
 ## 🧠 Kök Neden (Root Cause)
