@@ -21,18 +21,22 @@ async def test_end_to_end():
         tasks_cnt = (await session.execute(select(func.count(Task.id)))).scalar()
         sessions_cnt = (await session.execute(select(func.count(ProblemSession.id)))).scalar()
 
-        print(f"\n[1. VERİTABANI KONTROLÜ]")
-        print(f" - Toplam Problem Kaydı (ProblemRecord): {records_cnt} (Hedef: 50)")
-        print(f" - Toplam Oturum (ProblemSession): {sessions_cnt} (Hedef: 50)")
-        print(f" - Toplam Aksiyon Görevi (Task): {tasks_cnt} (Hedef: 50)")
+        closed_records_cnt = (await session.execute(select(func.count(ProblemRecordORM.id)).where(ProblemRecordORM.resolution_status == "closed"))).scalar()
+        completed_tasks_cnt = (await session.execute(select(func.count(Task.id)).where(Task.status == "completed"))).scalar()
 
-        # Check distribution per department
+        print(f"\n[1. VERİTABANI KONTROLÜ]")
+        print(f" - Toplam Problem Kaydı (ProblemRecord): {records_cnt} (Tamamlanan/Kapatılan: {closed_records_cnt})")
+        print(f" - Toplam Oturum (ProblemSession): {sessions_cnt} (AI Agent Chat Geçmişi Tamamlı)")
+        print(f" - Toplam Aksiyon Görevi (Task): {tasks_cnt} (Tamamlanan: {completed_tasks_cnt})")
+
+        assert records_cnt == 50, f"Expected 50 records, got {records_cnt}"
+        assert closed_records_cnt == 50, f"Expected 50 closed records, got {closed_records_cnt}"
+        assert completed_tasks_cnt == 50, f"Expected 50 completed tasks, got {completed_tasks_cnt}"
         dept_res = (await session.execute(select(ProblemRecordORM.department, func.count(ProblemRecordORM.id)).group_by(ProblemRecordORM.department))).all()
         print("\n [Departman Dağılımı]:")
         for dept, cnt in dept_res:
             print(f"   * {dept}: {cnt} kayıt")
 
-        assert records_cnt == 50, f"Expected 50 records, got {records_cnt}"
 
     # 2. Qdrant Vector Collection Check
     gemini_client = GeminiClient(settings.gemini_api_key, settings.gemini_llm_model, "models/gemini-embedding-001")

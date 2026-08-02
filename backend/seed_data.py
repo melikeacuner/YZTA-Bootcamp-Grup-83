@@ -850,6 +850,30 @@ async def seed_database():
         for idx, scenario in enumerate(SCENARIOS, 1):
             created_at = now - timedelta(days=(50 - idx))
             
+            # AI Agent turn-by-turn chat history for problem solving
+            chat_history = [
+                {
+                    "role": "assistant",
+                    "content": f"👋 Merhaba! **{scenario['department']}** departmanı bünyesinde **\"{scenario['title']}\"** başlıklı problem oturumu başlatıldı.\n\nİnceleme Modülü: **{scenario['methodology'].upper()} Metodolojisi**\n\n📌 **Problem Tanımı**: {scenario['description']}\n\nLütfen saha gözlemlerinizi ve ilk teknik bulguları paylaşın."
+                },
+                {
+                    "role": "user",
+                    "content": f"Saha ekibi ve teknik uzmanımız ({scenario['assignee']}) ile inceleme gerçekleştirdik. Yapılan analiz sonucunda kök nedenin **\"{scenario['root_cause']}\"** olduğunu tespit ettik."
+                },
+                {
+                    "role": "assistant",
+                    "content": f"🛠️ **Kök Neden Doğrulandı!**\n\n**Önerilen Düzeltici ve Önleyici Faaliyetler (DÖF)**:\n{scenario['corrective_actions']}\n\n🔒 **Yokoten & Yaygınlaştırma Standardı**:\n{scenario['lessons_learned']}\n\nAksiyonların uygulanması tamamlandığında kapatma ve A3 raporu üretme aşamasına geçilebilir."
+                },
+                {
+                    "role": "user",
+                    "content": f"Düzeltici ve önleyici faaliyetlerin hepsi başarıyla sahada uygulandı, kalibrasyon ve performans testleri tamamlandı. SOP dokümanı eklendi. Problem kaydını kapatabiliriz."
+                },
+                {
+                    "role": "assistant",
+                    "content": f"🎉 **Tebrikler!** Vaka kaydı başarıyla **KAPATILDI** ve onaylandı.\n\n✅ Kök Neden Çözüldü\n✅ DÖF Aksiyonu Uygulandı\n✅ Yokoten Standardı Yayınlandı\n✅ A3 Özet Raporu Oluşturuldu ve Qdrant Vektör Hafızasına İndekslendi."
+                }
+            ]
+
             # Create ProblemSession
             prob_session = ProblemSession(
                 owner_id=user_id,
@@ -857,15 +881,32 @@ async def seed_database():
                 problem_description=scenario["description"],
                 department=scenario["department"],
                 status=SessionStatus.COMPLETED.value,
-                step_data={"answers": {"kök_neden": scenario["root_cause"]}},
-                step_responses={"kök_neden": scenario["root_cause"]},
+                agent_status="closed",
+                assignee_name=scenario["assignee"],
+                tracker_name="Proby AI Agent",
+                summary=f"Problem: {scenario['title']}\nKök Neden: {scenario['root_cause']}\nÇözüm: {scenario['corrective_actions']}\nYokoten: {scenario['lessons_learned']}",
+                agent_chat_history=chat_history,
+                step_data={
+                    "answers": {
+                        "problem_definition": scenario["description"],
+                        "kök_neden": scenario["root_cause"],
+                        "aksiyonlar": scenario["corrective_actions"],
+                        "yokoten": scenario["lessons_learned"]
+                    }
+                },
+                step_responses={
+                    "problem_definition": scenario["description"],
+                    "kök_neden": scenario["root_cause"],
+                    "aksiyonlar": scenario["corrective_actions"],
+                    "yokoten": scenario["lessons_learned"]
+                },
                 created_at=created_at,
                 updated_at=created_at
             )
             session.add(prob_session)
             await session.flush()
 
-            # Create ProblemRecordORM
+            # Create ProblemRecordORM (ALL 50 CLOSED)
             rpn_val = scenario["severity"] * scenario["occurrence"] * scenario["detection"]
             record = ProblemRecordORM(
                 session_id=prob_session.id,
@@ -883,10 +924,38 @@ async def seed_database():
                 occurrence=scenario["occurrence"],
                 detection=scenario["detection"],
                 rpn=rpn_val,
-                yokoten_applied=True if idx % 2 == 0 else False,
-                closure_checklist={"checklist": ["Oturum tamamlandı", "Rapor kaydedildi", "Qdrant indekslendi"]},
-                resolution_status="closed" if scenario["task_status"] == "completed" else "open",
-                resolution_date=created_at + timedelta(days=2) if scenario["task_status"] == "completed" else None,
+                yokoten_applied=True,
+                closure_checklist={
+                    "checklist": [
+                        "Kök Neden Analizi ve Doğrulaması Tamamlandı",
+                        "AI Agent Çözüm Önerileri Değerlendirildi ve Onaylandı",
+                        "Düzeltici ve Önleyici Faaliyetler (DÖF) Uygulandı",
+                        "Saha Kalite Onayı ve Performans Testleri Alındı",
+                        "Yokoten (Yatay Yayılım) Standardı Yayınlandı",
+                        "Kapanış Özet Raporu ve Dokümanları Arşivlendi",
+                        "Qdrant Kurumsal Beyin Vektör Hafızasına Kaydedildi"
+                    ],
+                    "completed_by": scenario["assignee"],
+                    "approved_by": "Yönetici Onaylı (admin@proby.ai)"
+                },
+                resolution_status="closed",
+                resolution_date=created_at + timedelta(days=2),
+                meta_data={
+                    "resolution_chat_history": chat_history,
+                    "assignee_name": scenario["assignee"],
+                    "tracker_name": "Proby AI Agent",
+                    "documents": [
+                        {
+                            "id": str(uuid.uuid4()),
+                            "file_name": f"{scenario['department']}_SOP_Kapanis_Raporu.pdf",
+                            "file_size": 1024 * 420,
+                            "content_type": "application/pdf",
+                            "uploaded_at": (created_at + timedelta(days=2)).isoformat()
+                        }
+                    ],
+                    "ai_agent_summary": f"Vaka: {scenario['title']}. Kök Neden: {scenario['root_cause']}. Çözüm başarıyla tamamlandı ve Yokoten ile tüm hatlara uygulandı.",
+                    "report_pdf_generated": True
+                },
                 embedding_status=EmbeddingStatus.PENDING.value,
                 created_at=created_at,
                 updated_at=created_at
@@ -895,11 +964,7 @@ async def seed_database():
             await session.flush()
             created_records_count += 1
 
-            # Create Linked Task
-            deadline_date = created_at + timedelta(days=7)
-            if scenario["task_status"] == "delayed":
-                deadline_date = created_at - timedelta(days=2)
-
+            # Create Linked Task (ALL 50 COMPLETED)
             task = Task(
                 problem_record_id=record.id,
                 session_id=prob_session.id,
@@ -908,14 +973,29 @@ async def seed_database():
                 assignee_name=scenario["assignee"],
                 department=scenario["department"],
                 priority="high" if rpn_val > 150 else "medium",
-                deadline=deadline_date,
-                status=scenario["task_status"],
-                proof_description=scenario.get("proof_description"),
+                deadline=created_at + timedelta(days=5),
+                status="completed",
+                proof_description=f"Tüm düzeltici aksiyonlar sahada başarıyla uygulandı, kalite testleri onaylandı: {scenario['corrective_actions']}",
+                proof_url=f"https://docs.proby.ai/reports/{scenario['department'].lower()}_kapanis.pdf",
                 created_at=created_at,
-                updated_at=created_at
+                updated_at=created_at + timedelta(days=2)
             )
             session.add(task)
             created_tasks_count += 1
+
+            # Audit Log for closed record
+            audit_log = AuditLog(
+                user_id=user_id,
+                operation="CLOSE_RECORD",
+                entity_type="problem_record",
+                entity_id=record.id,
+                before_state={"resolution_status": "open"},
+                after_state={"resolution_status": "closed", "task_status": "completed"},
+                before_values={"status": "active"},
+                after_values={"status": "closed"},
+                created_at=created_at + timedelta(days=2)
+            )
+            session.add(audit_log)
 
             # Process Qdrant Embedding
             embedding_text = f"{record.title}\n{record.description}\n{record.lessons_learned}"
