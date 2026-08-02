@@ -40,10 +40,17 @@ Toplantı ScreenShotları :
 ### - Sprint board update: Sprint board screenshot:
 <img width="1143" height="864" alt="image (1)" src="https://github.com/user-attachments/assets/c4a84745-ec81-4bc9-890a-a1ed2b67d80d" />
 
-### - Ürün Durumu: Ekran görüntüleri (MvP): 
-<img width="1600" height="781" alt="giriş" src="https://github.com/user-attachments/assets/1a26f222-9b8b-4346-b6d7-810366464650" />
+<details>
+<summary>### - Ürün Durumu: Ekran görüntüleri (MvP):</summary>
 
+<img width="1600" height="781" alt="giriş" src="https://github.com/user-attachments/assets/1a26f222-9b8b-4346-b6d7-810366464650" />
 <img width="1600" height="787" alt="yeniproblem" src="https://github.com/user-attachments/assets/4996aa98-421c-4bba-85a3-eacf8c90d775" />
+</details>
+
+
+
+
+
 
 ### - Sprint Review:
 Bu sprintte projenin temel yapısı netleştirildi ve güçlü bir başlangıç yapıldı. Ürünün amacı, kapsamı ve teknik mimarisi belirlenerek geliştirme süreci için sağlam bir zemin oluşturuldu. Problem çözme yaklaşımları, AI entegrasyonu ve RAG altyapısı planlandı, arayüz tasarımına başlanarak sistemin nasıl çalışacağı somutlaştırıldı. Genel olarak sprint hedeflerine büyük ölçüde ulaşıldı ve proje artık geliştirme aşamasına geçmeye hazır hale geldi. Sprint Review katılımcıları: Melisa Özkılıç, Melike Acuner, Şevket Binali, Merve Yüsra Bektaş.
