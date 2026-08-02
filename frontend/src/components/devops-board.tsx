@@ -496,8 +496,8 @@ export default function DevOpsBoard({ onViewReport }: DevOpsBoardProps) {
 
       {/* Modal: Update / Task Management Detail */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="w-full max-w-lg bg-[#061320] border border-[#10293f] rounded-xl overflow-hidden shadow-2xl relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-6 md:pt-10 px-4 pb-12 overflow-y-auto z-50 animate-fade-in">
+          <div className="w-full max-w-lg bg-[#061320] border border-[#10293f] rounded-xl overflow-hidden shadow-2xl relative mt-2 md:mt-4">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
             <div className="p-4 border-b border-[#10293f] flex items-center justify-between">
               <div>

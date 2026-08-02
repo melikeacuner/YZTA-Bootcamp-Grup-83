@@ -7,7 +7,7 @@ import { DashboardStats, TaskResponse } from "@/lib/types";
 import { DEPARTMENT_PERSONNEL } from "./devops-board";
 import { 
   Loader2, Activity, ShieldAlert, CheckCircle2, TrendingUp, Building2, Filter, 
-  AlertCircle, Clock, UserCheck, Calendar, Edit3, X, Check, UserX 
+  AlertCircle, Clock, UserCheck, Calendar, Edit3, X, Check, UserX, ChevronDown, ChevronUp 
 } from "lucide-react";
 
 export default function ManagerDashboard() {
@@ -17,6 +17,7 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedDept, setSelectedDept] = useState<string>("Tüm Şirket");
   const [error, setError] = useState<string | null>(null);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
 
   // Modal State for Task Assignment / Edit
   const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
@@ -199,8 +200,8 @@ export default function ManagerDashboard() {
     <div className="w-full space-y-8 animate-fade-in pb-8">
       {/* Task Assignment Modal */}
       {selectedTask && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center pt-12 md:pt-16 px-4 pb-12 overflow-y-auto z-50 animate-fade-in">
-          <div className="w-full max-w-lg bg-[#061320] border border-[#10293f] rounded-2xl p-6 shadow-2xl space-y-5 my-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center pt-6 md:pt-10 px-4 pb-12 overflow-y-auto z-50 animate-fade-in">
+          <div className="w-full max-w-lg bg-[#061320] border border-[#10293f] rounded-2xl p-6 shadow-2xl space-y-5 mt-2 md:mt-4">
             <div className="flex justify-between items-center border-b border-[#10293f] pb-3">
               <div>
                 <h3 className="text-base font-bold text-[#e0f7fa] flex items-center gap-2">
@@ -489,8 +490,8 @@ export default function ManagerDashboard() {
         </div>
       </div>
 
-      {/* Distributions Charts Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Distributions Charts Panel (Departman & Metodoloji) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Department */}
         <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-cyan-500/5">
           <div className="border-b border-[#10293f] pb-3 flex justify-between items-center">
@@ -501,17 +502,6 @@ export default function ManagerDashboard() {
             <span className="text-[10px] font-mono text-[#00e5ff]">{selectedDept}</span>
           </div>
           {renderBarChart(stats.department_distribution, "linear-gradient(90deg, #00e5ff, #00b0ff)")}
-        </div>
-
-        {/* Categories */}
-        <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-cyan-500/5">
-          <div className="border-b border-[#10293f] pb-3 flex justify-between items-center">
-            <div>
-              <h3 className="text-xs font-bold text-[#e0f7fa] uppercase tracking-widest">Kategori Dağılımı</h3>
-              <p className="text-[10px] text-[#4f7b92] mt-0.5">En sık karşılaşılan kök problem tipleri</p>
-            </div>
-          </div>
-          {renderBarChart(stats.category_distribution, "linear-gradient(90deg, #7c4dff, #ff1744)")}
         </div>
 
         {/* Methodologies */}
@@ -526,7 +516,7 @@ export default function ManagerDashboard() {
         </div>
       </div>
 
-      {/* FMEA Risk Heatmap Matrix & Department KPI Matrix */}
+      {/* FMEA Risk Heatmap Matrix & Department KPI Matrix + Collapsible Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
         {/* FMEA RPN Risk Heatmap (3x3 Matrix) */}
         <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-cyan-500/5">
@@ -611,50 +601,86 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
-        {/* Department KPI Matrix */}
-        <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-cyan-500/5 flex flex-col justify-between">
-          <div>
-            <div className="border-b border-[#10293f] pb-3">
-              <h3 className="text-xs font-bold text-[#e0f7fa] uppercase tracking-widest">Departman Risk & Performans Matrisi</h3>
-              <p className="text-[10px] text-[#4f7b92] mt-0.5">Birimlerin aktif problem sayısı ve risk durumları</p>
+        {/* Right Column: Department KPI Matrix + Bottom-Right Collapsible Kategori Dağılımı */}
+        <div className="space-y-6 flex flex-col justify-between">
+          {/* Department KPI Matrix */}
+          <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-cyan-500/5">
+            <div>
+              <div className="border-b border-[#10293f] pb-3">
+                <h3 className="text-xs font-bold text-[#e0f7fa] uppercase tracking-widest">Departman Risk & Performans Matrisi</h3>
+                <p className="text-[10px] text-[#4f7b92] mt-0.5">Birimlerin aktif problem sayısı ve risk durumları</p>
+              </div>
+              <div className="overflow-x-auto pt-2">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#10293f] text-[#80deea] font-semibold text-[10px] uppercase font-mono">
+                      <th className="py-2.5">Departman</th>
+                      <th className="py-2.5 text-center">Vaka Yükü</th>
+                      <th className="py-2.5 text-center">Risk Seviyesi</th>
+                      <th className="py-2.5 text-right">Durum</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#10293f]/40 text-[#e0f7fa]">
+                    {Object.entries(stats.department_distribution).map(([dept, count]) => {
+                      const riskLevel = count > 3 ? "Yüksek Risk" : count > 1 ? "Orta Risk" : "Düşük Risk";
+                      const statusColor = count > 3 ? "text-red-400 bg-red-500/10 border-red-500/20" : count > 1 ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" : "text-green-400 bg-green-500/10 border-green-500/20";
+                      return (
+                        <tr key={dept} className="hover:bg-[#061320]/40 transition-colors">
+                          <td className="py-3 font-semibold text-sm">{dept}</td>
+                          <td className="py-3 text-center font-mono font-bold text-[#00e5ff]">{count}</td>
+                          <td className="py-3 text-center">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${statusColor}`}>
+                              {riskLevel}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            <span className="text-[10px] text-[#4f7b92] font-mono">Takipte</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="overflow-x-auto pt-2">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-[#10293f] text-[#80deea] font-semibold text-[10px] uppercase font-mono">
-                    <th className="py-2.5">Departman</th>
-                    <th className="py-2.5 text-center">Vaka Yükü</th>
-                    <th className="py-2.5 text-center">Risk Seviyesi</th>
-                    <th className="py-2.5 text-right">Durum</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#10293f]/40 text-[#e0f7fa]">
-                  {Object.entries(stats.department_distribution).map(([dept, count]) => {
-                    const riskLevel = count > 3 ? "Yüksek Risk" : count > 1 ? "Orta Risk" : "Düşük Risk";
-                    const statusColor = count > 3 ? "text-red-400 bg-red-500/10 border-red-500/20" : count > 1 ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" : "text-green-400 bg-green-500/10 border-green-500/20";
-                    return (
-                      <tr key={dept} className="hover:bg-[#061320]/40 transition-colors">
-                        <td className="py-3 font-semibold text-sm">{dept}</td>
-                        <td className="py-3 text-center font-mono font-bold text-[#00e5ff]">{count}</td>
-                        <td className="py-3 text-center">
-                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${statusColor}`}>
-                            {riskLevel}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right">
-                          <span className="text-[10px] text-[#4f7b92] font-mono">Takipte</span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+            <div className="p-3 bg-gradient-to-r from-cyan-950/30 to-purple-950/30 border border-cyan-500/30 rounded-xl text-[11px] text-[#80deea] leading-relaxed mt-4">
+              <strong className="text-white block mb-1">💡 Yönetici Tavsiyesi:</strong>
+              {selectedDept !== "Tüm Şirket" ? `${selectedDept} departmanındaki` : "Tüm şirketteki"} aksiyon planlarının zamanında kapatılmasını DevOps Aksiyon Paneli üzerinden denetleyebilir ve aksiyon sorumlularını takip edebilirsiniz.
             </div>
           </div>
 
-          <div className="p-3 bg-gradient-to-r from-cyan-950/30 to-purple-950/30 border border-cyan-500/30 rounded-xl text-[11px] text-[#80deea] leading-relaxed mt-4">
-            <strong className="text-white block mb-1">💡 Yönetici Tavsiyesi:</strong>
-            {selectedDept !== "Tüm Şirket" ? `${selectedDept} departmanındaki` : "Tüm şirketteki"} aksiyon planlarının zamanında kapatılmasını DevOps Aksiyon Paneli üzerinden denetleyebilir ve aksiyon sorumlularını takip edebilirsiniz.
+          {/* En Sağ Alt: Açılır Kapanır Kategori Dağılımı */}
+          <div className="p-5 glass rounded-xl space-y-4 shadow-md shadow-purple-500/10 border border-purple-500/30">
+            <button
+              type="button"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              className="w-full flex items-center justify-between border-b border-[#10293f] pb-3 text-left focus:outline-none group cursor-pointer"
+            >
+              <div>
+                <h3 className="text-xs font-bold text-[#e0f7fa] uppercase tracking-widest flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-purple-400" />
+                  Kategori Dağılımı
+                </h3>
+                <p className="text-[10px] text-[#4f7b92] mt-0.5">En sık karşılaşılan kök problem tipleri</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 rounded font-mono">
+                  {isCategoryOpen ? "Daralt ▲" : "Aşağı Aç ▼"}
+                </span>
+                {isCategoryOpen ? (
+                  <ChevronUp className="w-4 h-4 text-purple-400 group-hover:text-white transition" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-purple-400 group-hover:text-white transition" />
+                )}
+              </div>
+            </button>
+
+            {isCategoryOpen && (
+              <div className="animate-fade-in pt-1">
+                {renderBarChart(stats.category_distribution, "linear-gradient(90deg, #7c4dff, #ff1744)")}
+              </div>
+            )}
           </div>
         </div>
       </div>

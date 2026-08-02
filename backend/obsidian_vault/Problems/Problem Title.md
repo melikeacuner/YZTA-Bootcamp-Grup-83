@@ -1,5 +1,5 @@
 ---
-id: 6faefe6a-21d6-4e02-963a-23cf46a5e860
+id: daf4fc4b-dc02-404a-9d43-4b3b8d8c2b12
 title: "Problem Title"
 department: "Kalite"
 methodology: "pdca"
@@ -11,11 +11,11 @@ status: "closed"
 assignee: "Atanmamış"
 tracker: "Atanmamış"
 tags:
-  - ProblemÇözme
   - A3
+  - ProblemÇözme
 yokoten_applied: false
-created_at: "2026-08-02T09:45:40"
-closed_at: "2026-08-02T09:45:40.793217"
+created_at: "2026-08-02T09:49:55"
+closed_at: "2026-08-02T09:49:55.919938"
 created_by: "Kullanici"
 ---
 
@@ -27,8 +27,8 @@ Uretim hattinda tekrarlayan duraksamalar musteri teslimatlarini geciktiriyor tes
 ## 👥 Atamalar & Tarihler
 - **Sorumlu (Assignee):** Atanmamış
 - **Denetçi (Tracker):** Atanmamış
-- **Açılış Tarihi:** 02.08.2026 09:45
-- **Kapanış Tarihi:** 02.08.2026 09:45
+- **Açılış Tarihi:** 02.08.2026 09:49
+- **Kapanış Tarihi:** 02.08.2026 09:49
 
 ## 🧠 Kök Neden (Root Cause)
 Analiz ve sohbet verileri ile tespit edilen kök neden.
