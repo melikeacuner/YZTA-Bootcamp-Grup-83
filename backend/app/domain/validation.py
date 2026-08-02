@@ -15,9 +15,11 @@ def validate_search_query(text: str) -> str:
 
 
 def validate_lessons_learned(text: str) -> str:
+    if not text or not text.strip():
+        raise ValueError("lessons_learned bos birakilamaz")
     word_count = len(text.split())
-    if not (100 <= word_count <= 500):
+    if word_count > 1000:
         raise ValueError(
-            f"lessons_learned 100-500 kelime araliginda olmalidir (su an: {word_count})"
+            f"lessons_learned en fazla 1000 kelime olmalidir (su an: {word_count})"
         )
     return text

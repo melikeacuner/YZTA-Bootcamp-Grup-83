@@ -10,9 +10,10 @@ _ENGINES: dict[MethodologyType, type[MethodologyEngine]] = {
     MethodologyType.EIGHT_D: EightDEngine,
     MethodologyType.FIVE_WHY: FiveWhyEngine,
     MethodologyType.PDCA: PDCAEngine,
+    MethodologyType.AGENT: EightDEngine,
 }
 
 
 def get_engine(methodology: MethodologyType) -> MethodologyEngine:
-    engine_cls = _ENGINES[methodology]
+    engine_cls = _ENGINES.get(methodology, EightDEngine)
     return engine_cls()

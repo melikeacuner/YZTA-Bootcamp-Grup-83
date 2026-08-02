@@ -1,5 +1,5 @@
 ---
-id: daf4fc4b-dc02-404a-9d43-4b3b8d8c2b12
+id: 079484cf-be58-4fd7-9bf5-77fff0482bd8
 title: "Problem Title"
 department: "Kalite"
 methodology: "pdca"
@@ -11,11 +11,13 @@ status: "closed"
 assignee: "Atanmamış"
 tracker: "Atanmamış"
 tags:
+  - analiz
   - A3
+  - problem
   - ProblemÇözme
 yokoten_applied: false
-created_at: "2026-08-02T09:49:55"
-closed_at: "2026-08-02T09:49:55.919938"
+created_at: "2026-08-02T15:16:43"
+closed_at: "2026-08-02T15:16:43.823752"
 created_by: "Kullanici"
 ---
 
@@ -27,8 +29,8 @@ Uretim hattinda tekrarlayan duraksamalar musteri teslimatlarini geciktiriyor tes
 ## 👥 Atamalar & Tarihler
 - **Sorumlu (Assignee):** Atanmamış
 - **Denetçi (Tracker):** Atanmamış
-- **Açılış Tarihi:** 02.08.2026 09:49
-- **Kapanış Tarihi:** 02.08.2026 09:49
+- **Açılış Tarihi:** 02.08.2026 15:16
+- **Kapanış Tarihi:** 02.08.2026 15:16
 
 ## 🧠 Kök Neden (Root Cause)
 Analiz ve sohbet verileri ile tespit edilen kök neden.
@@ -50,6 +52,9 @@ Sonuç: Problem kapatıldı.
 ## 🛠️ Düzeltici Eylemler & Aksiyonlar
 - [[Tasks/Kök Neden Çözümü- Problem- Uretim hattinda tekrarlayan du...|Kök Neden Çözümü: Problem: Uretim hattinda tekrarlayan du...]] — Sorumlu: **Atanmamış** — Durum: `completed`
 
+
+## 👥 Benzer Vakalar (Semantik RAG)
+- [[Problems/benzer vaka|benzer vaka]] (Benzerlik Skoru: %90)
 
 
 ## 💬 Çözüm Sohbeti & AI Önerileri

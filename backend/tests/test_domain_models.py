@@ -59,13 +59,12 @@ def test_description_length_boundaries_accept(length):
     assert len(record.description) == length
 
 
-@given(word_count=st.integers(min_value=1, max_value=99))
-def test_lessons_learned_below_minimum_rejected(word_count):
+def test_lessons_learned_empty_rejected():
     with pytest.raises(ValueError):
-        make_record(lessons_learned=" ".join(["k"] * word_count))
+        make_record(lessons_learned="")
 
 
-@given(word_count=st.integers(min_value=501, max_value=700))
+@given(word_count=st.integers(min_value=1001, max_value=1200))
 def test_lessons_learned_above_maximum_rejected(word_count):
     with pytest.raises(ValueError):
         make_record(lessons_learned=" ".join(["k"] * word_count))

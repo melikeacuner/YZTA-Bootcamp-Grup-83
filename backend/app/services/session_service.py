@@ -350,12 +350,14 @@ class SessionService:
         return problem_session
 
     async def complete_session(self, problem_session: ProblemSession) -> ProblemSession:
-        engine = self._engine_for(problem_session)
-        answers_map = dict((problem_session.step_data or {}).get("answers", {}))
-        if problem_session.step_responses:
-            answers_map.update(problem_session.step_responses)
-        if len(answers_map) < engine.min_steps_to_complete:
-            raise SessionIncompleteError(problem_session.id)
+        is_agent_session = problem_session.methodology in [MethodologyType.AGENT.value, "agent"]
+        if not is_agent_session:
+            engine = self._engine_for(problem_session)
+            answers_map = dict((problem_session.step_data or {}).get("answers", {}))
+            if problem_session.step_responses:
+                answers_map.update(problem_session.step_responses)
+            if len(answers_map) < engine.min_steps_to_complete:
+                raise SessionIncompleteError(problem_session.id)
 
         problem_session.status = SessionStatus.COMPLETED.value
         await self._audit.log(

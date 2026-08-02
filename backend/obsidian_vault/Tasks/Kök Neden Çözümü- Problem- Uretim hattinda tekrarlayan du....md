@@ -1,10 +1,10 @@
 ---
-id: 9eff160a-54c3-4d1b-b2be-fefd3b3d23ed
+id: e47b0823-0b54-4d89-8642-3c1830316ee3
 title: "Kök Neden Çözümü: Problem: Uretim hattinda tekrarlayan du..."
 status: "completed"
 assignee: "Atanmamış"
 deadline: ""
-created_at: "2026-08-02T09:49:55"
+created_at: "2026-08-02T15:16:43"
 ---
 
 # [[Tasks/Kök Neden Çözümü- Problem- Uretim hattinda tekrarlayan du...|Kök Neden Çözümü: Problem: Uretim hattinda tekrarlayan du...]]

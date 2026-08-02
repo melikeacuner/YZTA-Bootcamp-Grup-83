@@ -21,7 +21,7 @@ MAX_PAGE_SIZE = 100
 
 class CreateRecordRequest(BaseModel):
     session_id: uuid.UUID
-    title: str = Field(min_length=1, max_length=200)
+    title: str = Field(min_length=1, max_length=500)
     description: Optional[str] = None
     lessons_learned: str
     root_cause: Optional[str] = None
@@ -97,7 +97,7 @@ async def create_record(
     session_obj = await ProblemSessionRepository(db).get_by_id(payload.session_id)
     if session_obj is None or session_obj.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Oturum bulunamadi")
-    if session_obj.status not in [SessionStatus.COMPLETED.value, "pool"]:
+    if session_obj.status not in [SessionStatus.COMPLETED.value, "pool", SessionStatus.ACTIVE.value]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Kayıt oluşturmak için oturum tamamlanmış olmalıdır.",

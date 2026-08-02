@@ -21,6 +21,52 @@ interface MethodologyChatProps {
   onFinalized: (recordId: string) => void;
 }
 
+function generateAutoTags(text: string, dept: string): string[] {
+  const tagsSet = new Set<string>();
+
+  if (dept) {
+    tagsSet.add(dept.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9çğıöşü-]/gi, ""));
+  }
+
+  const textLower = (text || "").toLowerCase();
+
+  const keywordMap: Record<string, string[]> = {
+    "sunucu": ["sunucu", "server"],
+    "sanallaştırma": ["vmware", "nutanix", "esxi", "kvm", "hypervisor", "sanallaştırma", "uuid"],
+    "izolasyon": ["sl3", "sl4", "izolasyon", "izole", "firewall", "dmz"],
+    "veritabanı": ["postgresql", "postgres", "veritabanı", "database", "sql", "api"],
+    "ağ-güvenliği": ["network", "güvenlik", "firewall", "port", "mtu", "mtls", "https", "haproxy"],
+    "kubernetes": ["kubernetes", "k8s", "container", "docker", "cgroup", "calico"],
+    "active-directory": ["active-directory", "domain-controller", "kerberos", "ntp", "mfa", "radius"],
+    "storage": ["storage", "ceph", "san", "nvme", "raid", "iscsi"],
+    "enjeksiyon": ["enjeksiyon", "kalıp", "çapak", "emiş-basıncı"],
+    "cnc-işleme": ["cnc", "torna", "rulman", "spindle", "pürüzlülük"],
+    "robotik": ["robotik", "montaj", "robot", "otomasyon"],
+    "cmm-ölçüm": ["cmm", "ölçüm", "kalibrasyon", "interferometre", "z-ekseni"],
+    "döküm": ["döküm", "alüminyum", "porozite", "gözenek", "sızdırmazlık"],
+    "kalite-kontrol": ["dikiş", "muayene", "kalite", "kusur"],
+    "soğuk-zincir": ["soğuk-hava", "dondurulmuş", "sensör", "fotosel", "ısı-yükselmesi"],
+    "wms-depo": ["wms", "barkod", "konveyör", "depo", "el-terminali"],
+    "agv-otomasyon": ["agv", "batarya", "bms", "otonom"],
+    "e-fatura": ["e-fatura", "entegratör", "gib", "zaman-aşımı"],
+    "nakit-akış": ["nakit-akış", "çek", "tahsilat", "takas"],
+    "ocr-masraf": ["ocr", "masraf", "harcama", "mükerrer"]
+  };
+
+  Object.entries(keywordMap).forEach(([tag, matches]) => {
+    if (matches.some(m => textLower.includes(m))) {
+      tagsSet.add(tag);
+    }
+  });
+
+  if (tagsSet.size < 2) {
+    tagsSet.add("kök-neden");
+    tagsSet.add("vaka-analizi");
+  }
+
+  return Array.from(tagsSet);
+}
+
 export default function MethodologyChat({ sessionId, onFinalized }: MethodologyChatProps) {
   const { token } = useAuth();
   const [session, setSession] = useState<SessionResponse | null>(null);
@@ -77,13 +123,17 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
 
     try {
       if (session?.status === "active") {
-        await completeSession(token, sessionId);
+        try {
+          await completeSession(token, sessionId);
+        } catch (compErr) {
+          console.warn("Session complete skipped:", compErr);
+        }
       }
 
       const answersMap = session?.answers || {};
       const record = await createRecord(token, {
         session_id: sessionId,
-        title: title || session?.summary || session?.problem_description.slice(0, 50) || "Problem Kaydı",
+        title: (title || session?.summary || session?.problem_description || "Problem Kaydı").slice(0, 200),
         description: description || session?.problem_description || "Problem tanımı ve detayları.",
         lessons_learned: lessonsLearned || "Kök neden tespiti yapıldı. Çözüm planlanmaktadır.",
         root_cause: rootCause || Object.values(answersMap).pop() as string || "Kök neden belirlendi.",
@@ -432,9 +482,9 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                 setDepartment(detectedDept);
                 const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || desc;
                 setRootCause(synth);
-                if (!title) {
-                  setTitle(desc);
-                }
+                setTitle(desc);
+                setDescription(desc);
+                setTags(generateAutoTags(desc, detectedDept));
                 setShowConfirmModal(true);
               }}
               className="px-3.5 py-1.5 bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20 hover:scale-105 transition-all cursor-pointer shrink-0"
@@ -612,11 +662,23 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                 <button
                   type="button"
                   onClick={() => {
-                    const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || session.problem_description;
+                    const desc = session.problem_description || "";
+                    const descLower = desc.toLowerCase();
+                    const detectedDept =
+                      descLower.includes("vmware") || descLower.includes("nutanix") || descLower.includes("sunucu") || descLower.includes("server") || descLower.includes("network") || descLower.includes("yazılım") || descLower.includes("veritabanı") || descLower.includes("api") || descLower.includes("sistem") || descLower.includes("bilgi işlem") || descLower.includes("it ") || descLower.startsWith("it") ? "Bilgi İşlem"
+                      : descLower.includes("lojistik") || descLower.includes("depo") || descLower.includes("nakliye") || descLower.includes("sevkiyat") || descLower.includes("tedarik") ? "Lojistik"
+                      : descLower.includes("kalite") || descLower.includes("ölçüm") || descLower.includes("muayene") || descLower.includes("hata") || descLower.includes("reddet") ? "Kalite"
+                      : descLower.includes("finans") || descLower.includes("fatura") || descLower.includes("muhasebe") || descLower.includes("ödeme") || descLower.includes("bütçe") ? "Finans"
+                      : descLower.includes("enjeksiyon") || descLower.includes("makine") || descLower.includes("üretim") || descLower.includes("hat ") || descLower.includes("cnc") || descLower.includes("kaynak") ? "Üretim"
+                      : descLower.includes("ar-ge") || descLower.includes("araştırma") || descLower.includes("geliştirme") ? "Ar-Ge"
+                      : descLower.includes("ik") || descLower.includes("insan kaynakları") || descLower.includes("personel") ? "İnsan Kaynakları"
+                      : department;
+                    setDepartment(detectedDept);
+                    const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || desc;
                     setRootCause(synth);
-                    if (!title) {
-                      setTitle(`Problem: ${session.problem_description.slice(0, 40)}...`);
-                    }
+                    setTitle(desc);
+                    setDescription(desc);
+                    setTags(generateAutoTags(desc, detectedDept));
                     setShowConfirmModal(true);
                   }}
                   className="w-full py-2.5 bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10 hover:shadow-cyan-500/25 transition-all"
@@ -791,20 +853,7 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                     </div>
                   </div>
 
-                  {/* Row 5: Yokoten Scope */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-semibold text-[#80deea] flex items-center gap-1">
-                      <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Yokoten (Yatay Yayılım) Kapsamı & Hedefler</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={yokotenScope}
-                      onChange={(e) => setYokotenScope(e.target.value)}
-                      placeholder="Çözümün yayılacağı birimler, ekipmanlar veya tesisler..."
-                      className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
-                    />
-                  </div>
+
 
                   {/* Row 6: DevOps Status (assignment will be done in Problem Havuzu) */}
                   <div className="pt-2 border-t border-[#10293f]">

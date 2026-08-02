@@ -85,7 +85,7 @@ async def test_create_from_session_rejects_short_lessons_learned(ctx):
 
     with pytest.raises(ValueError):
         await service.create_from_session(
-            problem_session, owner_id, title="Baslik", lessons_learned="cok kisa"
+            problem_session, owner_id, title="Baslik", lessons_learned=""
         )
 
 
