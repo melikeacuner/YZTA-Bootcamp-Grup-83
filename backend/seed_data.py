@@ -926,13 +926,14 @@ async def seed_database():
                 rpn=rpn_val,
                 yokoten_applied=True,
                 closure_checklist={
+                    "yokoten_scope": f"{scenario['department']} bünyesindeki tüm ilgili hat, ekipman ve standart operasyon prosedürlerine (SOP) yatay olarak yaygınlaştırıldı ve uygulandı.",
                     "checklist": [
-                        "Kök Neden Analizi ve Doğrulaması Tamamlandı",
-                        "AI Agent Çözüm Önerileri Değerlendirildi ve Onaylandı",
-                        "Düzeltici ve Önleyici Faaliyetler (DÖF) Uygulandı",
-                        "Saha Kalite Onayı ve Performans Testleri Alındı",
-                        "Yokoten (Yatay Yayılım) Standardı Yayınlandı",
-                        "Kapanış Özet Raporu ve Dokümanları Arşivlendi",
+                        f"{scenario['methodology'].upper()} Kök Neden Analizi ve Doğrulaması Tamamlandı",
+                        f"Tedarik/Teknik Kök Neden: {scenario['root_cause'][:60]}...",
+                        "Düzeltici ve Önleyici Faaliyetler (DÖF) Sahada Uygulandı",
+                        "Saha Kalite Onayı ve Performans Kalibrasyonu Alındı",
+                        f"Yokoten (Yatay Yayılım) Standardı {scenario['department']} Biriminde Yayınlandı",
+                        "A3 Kapanış Özet Raporu ve SOP Dokümanları Arşivlendi",
                         "Qdrant Kurumsal Beyin Vektör Hafızasına Kaydedildi"
                     ],
                     "completed_by": scenario["assignee"],

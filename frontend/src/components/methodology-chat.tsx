@@ -381,10 +381,29 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
             {session.problem_description}
           </p>
         </div>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${session.status === "active" ? "bg-green-500/10 text-green-400 font-semibold" : "bg-cyan-500/10 text-cyan-400"
-          }`}>
-          {session.status === "active" ? "Canlı AI Oturumu" : "Tamamlandı"}
-        </span>
+        <div className="flex items-center gap-3">
+          {session.status === "active" && (
+            <button
+              type="button"
+              onClick={() => {
+                const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || session.problem_description;
+                setRootCause(synth);
+                if (!title) {
+                  setTitle(`Problem: ${session.problem_description.slice(0, 40)}...`);
+                }
+                setShowConfirmModal(true);
+              }}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/20 hover:scale-105 transition-all cursor-pointer shrink-0"
+            >
+              <Sparkles size={13} />
+              <span>Oturumu Sonlandır & Havuza Gönder</span>
+            </button>
+          )}
+          <span className={`text-[10px] px-2 py-0.5 rounded-full ${session.status === "active" ? "bg-green-500/10 text-green-400 font-semibold" : "bg-cyan-500/10 text-cyan-400"
+            }`}>
+            {session.status === "active" ? "Canlı AI Oturumu" : "Tamamlandı"}
+          </span>
+        </div>
       </div>
 
       {/* Main Container */}
@@ -522,46 +541,46 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
             </form>
           )}
 
-          {/* Dynamic AI Synthesized Root Cause Proposal Card */}
-          {(aiSynthesizedRoot || canComplete) && (
+          {/* Dynamic AI Synthesized Root Cause Proposal Card (Always visible when active) */}
+          {session.status === "active" && (
             <div className="p-4 bg-[#061320] border border-[#10293f] rounded-xl space-y-3 shadow-lg relative overflow-hidden animate-fade-in">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
               
               <div className="p-3.5 bg-cyan-950/30 border border-cyan-500/30 rounded-lg text-xs space-y-1.5">
                 <span className="font-bold text-[#00e5ff] flex items-center gap-1.5 uppercase font-mono tracking-wider text-[10px]">
                   <Sparkles size={13} className="animate-pulse text-[#00e5ff]" />
-                  AI Tarafından Sentezlenen Kök Neden Hipotezi
+                  AI Tarafından Sentezlenen Kök Neden Hipotezi / Durumu
                 </span>
                 <p className="text-[#e0f7fa] font-medium leading-relaxed">
-                  {aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || "Analiz adımları değerlendirildi."}
+                  {aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || "AI Ajanı ile görüşme devam ediyor. Kök nedene ulaşıldığında aşağıdaki butona basarak oturumu sonlandırabilirsiniz."}
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const synth = aiSynthesizedRoot || (Object.values(answersMap).pop() as string) || "Kök neden belirlendi.";
-                  setRootCause(synth);
-                  if (!title) {
-                    setTitle(`Problem: ${session.problem_description.slice(0, 40)}...`);
-                  }
-                  setShowConfirmModal(true);
-                }}
-                className="w-full py-3 bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10 hover:shadow-cyan-500/25 transition-all"
-              >
-                <Sparkles size={14} />
-                <span>Kök Nedeni Onayla ve Problem Kaydı Oluştur</span>
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || session.problem_description;
+                    setRootCause(synth);
+                    if (!title) {
+                      setTitle(`Problem: ${session.problem_description.slice(0, 40)}...`);
+                    }
+                    setShowConfirmModal(true);
+                  }}
+                  className="w-full py-2.5 bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10 hover:shadow-cyan-500/25 transition-all"
+                >
+                  <Sparkles size={14} />
+                  <span>Kök Nedeni Onayla ve Havuza Gönder</span>
+                </button>
 
-              {canComplete && (
                 <button
                   onClick={handleComplete}
                   disabled={isBusy}
-                  className="w-full py-2 bg-[#0a1f33] border border-[#10293f] text-[#80deea] rounded-lg text-xs hover:bg-[#10293f] transition-all"
+                  className="w-full py-2.5 bg-[#0a1f33] border border-[#10293f] text-[#80deea] hover:text-white rounded-lg text-xs hover:bg-[#10293f] transition-all font-medium"
                 >
                   Manuel Detaylı A3 Raporu Doldur
                 </button>
-              )}
+              </div>
             </div>
           )}
 

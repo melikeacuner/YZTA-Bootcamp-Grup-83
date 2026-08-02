@@ -312,26 +312,44 @@ export default function UnifiedRecordDetail({ recordId, onClose }: UnifiedRecord
                 <div className="flex items-center justify-between">
                   <span className="text-[#4f7b92]">Yokoten Durumu:</span>
                   {record.yokoten_applied ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-[#00e676] font-bold">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded bg-green-500/10 text-[#00e676] font-bold border border-green-500/30">
                       YAYGINLAŞTIRILDI
                     </span>
                   ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#10293f] text-[#4f7b92]">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded bg-[#10293f] text-[#4f7b92]">
                       LOKAL UYGULAMA
                     </span>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-[#10293f]/50 space-y-1.5">
-                  <p className="text-[10px] text-[#4f7b92]">KAPATMA KONTROL LİSTESİ:</p>
-                  <div className="flex items-center gap-2 text-[#e0f7fa]">
-                    <span className="w-2.5 h-2.5 rounded bg-green-500/20 text-[#00e676] flex items-center justify-center text-[8px] font-bold">✓</span>
-                    <span>Problem tanımı yapay zeka tarafından incelendi</span>
+                {record.closure_checklist?.yokoten_scope && (
+                  <div className="text-[11px] text-[#80deea] bg-cyan-950/30 p-2.5 rounded-lg border border-cyan-500/30">
+                    <strong className="text-white block mb-0.5 font-mono text-[10px] uppercase">🌐 Yaygınlaştırma Kapsamı (Yokoten Target):</strong>
+                    {record.closure_checklist.yokoten_scope}
                   </div>
-                  <div className="flex items-center gap-2 text-[#e0f7fa]">
-                    <span className="w-2.5 h-2.5 rounded bg-green-500/20 text-[#00e676] flex items-center justify-center text-[8px] font-bold">✓</span>
-                    <span>Kök neden doğrulaması yapıldı</span>
-                  </div>
+                )}
+
+                <div className="pt-2 border-t border-[#10293f]/50 space-y-2">
+                  <p className="text-[10px] text-[#4f7b92] font-mono uppercase font-bold">KAPATMA KONTROL LİSTESİ:</p>
+                  {record.closure_checklist?.checklist && Array.isArray(record.closure_checklist.checklist) ? (
+                    record.closure_checklist.checklist.map((item: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2 text-[#e0f7fa]">
+                        <span className="w-3.5 h-3.5 rounded-full bg-green-500/20 text-[#00e676] border border-green-500/40 flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+                        <span className="leading-snug">{item}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 text-[#e0f7fa]">
+                        <span className="w-3.5 h-3.5 rounded-full bg-green-500/20 text-[#00e676] border border-green-500/40 flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+                        <span>Kök neden analizi ve saha doğrulaması tamamlandı</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#e0f7fa]">
+                        <span className="w-3.5 h-3.5 rounded-full bg-green-500/20 text-[#00e676] border border-green-500/40 flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+                        <span>Kalıcı düzeltici ve önleyici faaliyetler uygulandı</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
