@@ -150,12 +150,12 @@ servisleri birlikte test etmek ve frontend tarafında kullanıcı deneyimini der
 Bu backlog, projenin final ürün haline getirilmesini temel alacak şekilde hazırlanmıştır. Görevler, sprint başına belirlenen puan sınırını aşmayacak şekilde dengeli olarak dağıtılmıştır. ClickUp üzerinde gri item’lar yapılacak işleri, mavi item’lar devam eden işleri ve yeşil item’lar tamamlanan işleri temsil etmektedir. Sprint sonlarındaki günler, ekibin dinlenmesi amacıyla planlı olarak boş bırakılmıştır. Proje kapsamında toplam 300 puanlık bir backlog belirlenmiş ve bu yük 3 sprinte bölünerek her sprintin 100 puan olacak şekilde ilerlemesi kararlaştırılmıştır. Ayrıca, user story’ler product backlog’lar içerisinde yer almakta olup, ilgili backlog item’lara tıklanarak hikayelerin detaylarına ulaşılabilmektedir.
 
 ### - Daily Scrum:
+Daily Scrum toplantıları, ekip yoğunlukları nedeniyle her gün düzenli olarak gerçekleştirilememiştir; ancak proje ile ilgili gelişmeler WhatsApp üzerinden sürekli olarak iletişim halinde kalınarak takip edilmiştir. Sprint başlangıç ve bitişlerinde ise Slack üzerinden düzenli toplantılar yapılmıştır.
 Konuşma ScreenShotları :
 https://imgur.com/a/fU7I5BC
 
 ### - Sprint board update: Sprint board screenshot:
-
-
+<img width="475" height="785" alt="sprint3" src="https://github.com/user-attachments/assets/bfb430f6-78db-468a-9e4f-f5fb4020b272" />
 
 ### - Ürün Durumu: Ekran görüntüleri : 
 <img width="1600" height="800" alt="b45bcb3d-f015-4e9e-9a71-20d9318f1d15" src="https://github.com/user-attachments/assets/2ae471a9-3b32-43ba-9aeb-6a66cb422932" />
@@ -164,8 +164,6 @@ https://imgur.com/a/fU7I5BC
 <img width="1600" height="796" alt="2ef0d510-9cdf-4f74-bcc7-a4baedfda71f" src="https://github.com/user-attachments/assets/d13e36e4-b4ba-414a-b0bf-7292dd700122" />
 <img width="1600" height="795" alt="42f4c245-87a2-4288-af36-ad627a42c222" src="https://github.com/user-attachments/assets/ed6563d7-d89c-4bc6-93ed-cd89ddc9d2c5" />
 <img width="1600" height="795" alt="f1725e6c-658f-40ae-8667-4b02c0d0f3cc" src="https://github.com/user-attachments/assets/0c125232-ff3d-49ea-8f48-3e9b66f097ad" />
-
-
 
 ### - Sprint Review: 
 - AI Agent (Advisor) entegrasyonu tamamlandı ve aktif hale getirildi
