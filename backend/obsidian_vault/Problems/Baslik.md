@@ -1,5 +1,5 @@
 ---
-id: 02fe2603-4423-4dc8-9f16-b12f69405d99
+id: de5491c8-9ae9-45d1-8dd7-a088afb2fc03
 title: "Baslik"
 department: "Diğer"
 methodology: "pdca"
@@ -13,7 +13,7 @@ tracker: "Atanmamış"
 tags:
 
 yokoten_applied: false
-created_at: "2026-07-31T13:01:11"
+created_at: "2026-08-02T09:45:43"
 closed_at: ""
 created_by: "Kullanici"
 ---
@@ -26,7 +26,7 @@ Uretim hattinda tekrarlayan duraksama sorunu yasaniyor test icin.
 ## 👥 Atamalar & Tarihler
 - **Sorumlu (Assignee):** Atanmamış
 - **Denetçi (Tracker):** Atanmamış
-- **Açılış Tarihi:** 31.07.2026 13:01
+- **Açılış Tarihi:** 02.08.2026 09:45
 - **Kapanış Tarihi:** Açık
 
 ## 🧠 Kök Neden (Root Cause)

@@ -12,8 +12,8 @@ assignee: "Atanmamış"
 tracker: "Atanmamış"
 tags:
   - agent
-  - diğer
   - çözüldü
+  - diğer
 yokoten_applied: false
 created_at: "2026-07-22T23:00:45.008161+00:00"
 closed_at: ""

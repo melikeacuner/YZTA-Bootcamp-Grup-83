@@ -107,6 +107,18 @@ export default function DevOpsBoard({ onViewReport }: DevOpsBoardProps) {
     e.preventDefault();
     if (!token || !selectedTask) return;
 
+    if (updateStatus === "in_progress" || updateStatus === "completed") {
+      if (!updateAssignee.trim() || !updateDept.trim() || !updateDeadline) {
+        setError("Görevi 'Devam Edenler' veya 'Tamamlananlar' durumuna almak için İsim (Sorumlu), Departman ve Termin Tarihi atanmalıdır.");
+        return;
+      }
+    }
+
+    if (updateStatus === "on_hold" && !proofDesc.trim()) {
+      setError("Görevi 'Beklemede (On Hold)' durumuna almak için konunun nerede beklediğine dair bir açıklama girilmelidir.");
+      return;
+    }
+
     try {
       await updateTask(token, selectedTask.id, {
         status: updateStatus,

@@ -191,6 +191,26 @@ async def update_task(
         "priority": task.priority
     }
 
+    # Restriction check: cannot move to in_progress or completed without assignee, department, and deadline
+    target_status = payload.status if payload.status is not None else task.status
+    target_assignee = payload.assignee_name if payload.assignee_name is not None else task.assignee_name
+    target_department = payload.department if payload.department is not None else task.department
+    target_deadline = payload.deadline if payload.deadline is not None else task.deadline
+    target_proof = payload.proof_description if payload.proof_description is not None else task.proof_description
+
+    if target_status in ["in_progress", "completed"]:
+        if not target_assignee or not target_assignee.strip() or not target_department or not target_department.strip() or not target_deadline:
+            raise HTTPException(
+                status_code=400,
+                detail="Görevi 'Devam Edenler' veya 'Tamamlananlar' durumuna almak için İsim (Sorumlu), Departman ve Termin Tarihi atanmalıdır."
+            )
+    elif target_status == "on_hold":
+        if not target_proof or not target_proof.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Görevi 'Beklemede (On Hold)' durumuna almak için konunun nerede beklediğine dair bir açıklama girilmelidir."
+            )
+
     if payload.title is not None:
         task.title = payload.title
     if payload.description is not None:

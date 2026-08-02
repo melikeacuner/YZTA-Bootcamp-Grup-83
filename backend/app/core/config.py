@@ -31,8 +31,8 @@ class Settings(BaseSettings):
 
     gemini_api_key: str | None = Field(default=None)
     gemini_llm_model: str = Field(default="gemini-flash-latest")
-    gemini_embedding_model: str = Field(default="models/text-embedding-004")
-    embedding_dimension: int = Field(default=768)
+    gemini_embedding_model: str = Field(default="models/gemini-embedding-001")
+    embedding_dimension: int = Field(default=3072)
     llm_timeout_seconds: float = Field(default=15.0)
 
     rag_similarity_threshold: float = Field(default=0.5)

@@ -1,5 +1,5 @@
 ---
-id: bbed9bda-7560-476c-a38a-304df6632988
+id: 24c2c5fb-c020-497e-8693-5b87c2cb34c0
 title: "A3 Test Record"
 department: "Diğer"
 methodology: "pdca"
@@ -13,7 +13,7 @@ tracker: "Atanmamış"
 tags:
 
 yokoten_applied: false
-created_at: "2026-07-31T13:01:11"
+created_at: "2026-08-02T09:45:42"
 closed_at: ""
 created_by: "Kullanici"
 ---
@@ -26,7 +26,7 @@ Uretim hattinda tekrarlayan duraksama sorunu yasaniyor test icin.
 ## 👥 Atamalar & Tarihler
 - **Sorumlu (Assignee):** Atanmamış
 - **Denetçi (Tracker):** Atanmamış
-- **Açılış Tarihi:** 31.07.2026 13:01
+- **Açılış Tarihi:** 02.08.2026 09:45
 - **Kapanış Tarihi:** Açık
 
 ## 🧠 Kök Neden (Root Cause)
