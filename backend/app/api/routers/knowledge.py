@@ -44,12 +44,14 @@ async def search_knowledge(
 
     # If Qdrant returns no results or query is empty/broad, fetch records from Postgres DB
     if not results:
-        db_records, _ = await knowledge_service.list_paginated(page=1, page_size=50)
+        db_records, _ = await knowledge_service.list_paginated(page=1, page_size=100)
         filtered = []
+        q_tokens = [t.lower() for t in q.strip().split()] if (q and q.strip()) else []
+
         for r in db_records:
             if methodology and r.methodology != methodology:
                 continue
-            if department and r.department != department:
+            if department and department != "Tüm Şirket" and r.department != department:
                 continue
             if assignee_name and (r.meta_data or {}).get("assignee_name") != assignee_name:
                 continue
@@ -59,15 +61,18 @@ async def search_knowledge(
             if end_date and r.resolution_date:
                 if r.resolution_date.isoformat() > end_date:
                     continue
-            if q and q.strip():
-                query_lower = q.lower()
-                text_corpus = f"{r.title} {r.description} {r.root_cause} {r.lessons_learned}".lower()
-                if query_lower not in text_corpus:
+
+            match_score = 1.0
+            if q_tokens:
+                text_corpus = f"{r.title} {r.description} {r.root_cause} {r.lessons_learned} {' '.join(r.tags or [])}".lower()
+                hits = sum(1 for tok in q_tokens if tok in text_corpus)
+                if hits == 0:
                     continue
+                match_score = round(hits / len(q_tokens), 2)
 
             filtered.append({
                 "id": str(r.id),
-                "score": 0.95 if q else 1.0,
+                "score": match_score if q_tokens else 1.0,
                 "title": r.title,
                 "description": r.description,
                 "methodology": r.methodology,
@@ -79,6 +84,9 @@ async def search_knowledge(
                 "assignee_name": (r.meta_data or {}).get("assignee_name"),
                 "resolution_date": r.resolution_date.isoformat() if r.resolution_date else None,
             })
+
+        # Sort filtered fallback results by match score descending
+        filtered.sort(key=lambda x: x["score"], reverse=True)
         results = filtered
 
     return APIResponse.ok(results)

@@ -545,20 +545,47 @@ class KnowledgeService:
 
     async def ask_corporate_brain(self, query: str, department: str | None = None) -> dict:
         """Kullanıcının sorusunu veritabanı ve Qdrant geçmiş vakalarından okuyup LLM ile sentezler."""
-        db_records, _ = await self.list_paginated(page=1, page_size=20)
-        
         relevant_docs = []
-        for r in db_records:
-            if department and r.department and department != "Tüm Şirket" and r.department != department:
-                continue
-            relevant_docs.append({
-                "id": str(r.id),
-                "title": r.title,
-                "department": r.department or "Genel",
-                "root_cause": r.root_cause or "Kök neden tespiti yapıldı.",
-                "lessons_learned": r.lessons_learned or "Düzeltici faaliyet uygulandı.",
-                "industry": r.industry or "İmalat"
-            })
+
+        # 1. Try vector RAG search via RAGSearchService first
+        if self._rag_service:
+            try:
+                dept_filter = department if (department and department != "Tüm Şirket") else None
+                vector_results = await self._rag_service.search(query, department=dept_filter)
+                for item in vector_results:
+                    relevant_docs.append({
+                        "id": str(item.get("id")),
+                        "title": item.get("title", ""),
+                        "department": item.get("department", "Genel"),
+                        "root_cause": item.get("root_cause") or item.get("description") or "Kök neden tespiti yapıldı.",
+                        "lessons_learned": item.get("lessons_learned") or "Düzeltici faaliyet uygulandı.",
+                        "industry": item.get("industry", "İmalat")
+                    })
+            except Exception as rag_err:
+                import logging
+                logging.getLogger(__name__).warning(f"RAG search error in ask_corporate_brain: {rag_err}")
+
+        # 2. If vector RAG returned no results, fallback to DB keyword matching
+        if not relevant_docs:
+            db_records, _ = await self.list_paginated(page=1, page_size=50)
+            query_tokens = [t.lower() for t in query.split() if len(t) > 2]
+            
+            for r in db_records:
+                if department and r.department and department != "Tüm Şirket" and r.department != department:
+                    continue
+                
+                text_corpus = f"{r.title} {r.description} {r.root_cause} {r.lessons_learned} {' '.join(r.tags or [])}".lower()
+                if query_tokens and not any(t in text_corpus for t in query_tokens):
+                    continue
+
+                relevant_docs.append({
+                    "id": str(r.id),
+                    "title": r.title,
+                    "department": r.department or "Genel",
+                    "root_cause": r.root_cause or "Kök neden tespiti yapıldı.",
+                    "lessons_learned": r.lessons_learned or "Düzeltici faaliyet uygulandı.",
+                    "industry": r.industry or "İmalat"
+                })
 
         if not relevant_docs:
             return {

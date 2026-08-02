@@ -9,8 +9,8 @@ def validate_problem_description(text: str) -> str:
 
 def validate_search_query(text: str) -> str:
     length = len(text)
-    if not (10 <= length <= 500):
-        raise ValueError(f"Arama sorgusu 10-500 karakter araliginda olmalidir (su an: {length})")
+    if not (2 <= length <= 500):
+        raise ValueError(f"Arama sorgusu 2-500 karakter araliginda olmalidir (su an: {length})")
     return text
 
 

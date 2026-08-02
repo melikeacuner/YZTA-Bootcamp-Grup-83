@@ -110,12 +110,13 @@ def get_knowledge_service(
     embedding_service=Depends(get_embedding_service),
     qdrant_repository=Depends(get_qdrant_repository),
     llm_service=Depends(get_llm_service),
+    rag_service=Depends(get_rag_service),
 ):
     from app.services.embedding_pipeline import EmbeddingPipeline
     from app.services.knowledge_service import KnowledgeService
 
     pipeline = EmbeddingPipeline(embedding_service, qdrant_repository)
-    return KnowledgeService(db, pipeline, qdrant_repository, llm_service=llm_service)
+    return KnowledgeService(db, pipeline, qdrant_repository, rag_service=rag_service, llm_service=llm_service)
 
 
 def get_agent_service(
