@@ -164,24 +164,81 @@ export default function UnifiedRecordDetail({ recordId, onClose }: UnifiedRecord
     }
 
     // --- DEFAULT / STEP RESPONSES VISUALIZATION ---
+    const stepEntries = Object.entries(responses).filter(([, v]) => typeof v === "string" && (v as string).trim().length > 0);
+    const rpnScore = record.rpn || (record.severity && record.occurrence && record.detection ? record.severity * record.occurrence * record.detection : null);
+    const rpnColor = rpnScore ? (rpnScore > 100 ? "#ff1744" : rpnScore > 40 ? "#ffea00" : "#00e676") : "#80deea";
+
     return (
-      <div className="space-y-3 pt-2">
+      <div className="space-y-4 pt-2">
         <div className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest font-bold">
-          📊 Metodoloji Analiz Adımları & Görselleştirme
+          📊 Metodoloji Analiz Adımları &amp; Görselleştirme
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {Object.entries(responses).map(([k, v], idx) => (
-            <div key={idx} className="p-3 bg-[#030a10] border border-[#10293f] rounded-xl space-y-1">
-              <div className="text-[10px] font-bold text-cyan-400 uppercase font-mono tracking-wide">
-                {k.replace(/_/g, " ")}
+
+        {/* RPN + FMEA Mini Summary */}
+        {rpnScore && (
+          <div className="grid grid-cols-4 gap-2 text-center text-xs">
+            {[
+              { label: "Şiddet (S)", val: record.severity || "—", color: "text-red-400" },
+              { label: "Sıklık (O)", val: record.occurrence || "—", color: "text-yellow-400" },
+              { label: "Tespit (D)", val: record.detection || "—", color: "text-blue-400" },
+              { label: "RPN Skoru", val: rpnScore, color: rpnScore > 100 ? "text-red-400" : rpnScore > 40 ? "text-yellow-400" : "text-green-400" },
+            ].map((item, i) => (
+              <div key={i} className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-xl space-y-0.5">
+                <div className="text-[9px] text-[#4f7b92] font-mono uppercase">{item.label}</div>
+                <div className={`text-xl font-black font-mono ${item.color}`}>{item.val}</div>
               </div>
-              <p className="text-xs text-[#e0f7fa] leading-relaxed">{typeof v === "string" ? v : JSON.stringify(v)}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Step Timeline */}
+        {stepEntries.length > 0 ? (
+          <div className="relative border-l-2 border-cyan-500/30 pl-4 space-y-3 ml-2">
+            {stepEntries.map(([k, v], idx) => (
+              <div key={idx} className="relative animate-fade-in group">
+                {/* Dot */}
+                <div className="absolute -left-[23px] top-3 w-3 h-3 rounded-full bg-gradient-to-br from-[#00e5ff] to-[#7c4dff] border-2 border-[#030a10] shadow-sm shadow-cyan-500/40" />
+                <div className="p-3.5 bg-[#030a10] border border-[#10293f] rounded-xl space-y-1.5 hover:border-[#00e5ff]/40 transition-all">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-cyan-400 uppercase font-mono tracking-wide">
+                      {k.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#10293f] text-[#4f7b92] font-mono">Adım {idx + 1} / {stepEntries.length}</span>
+                  </div>
+                  <p className="text-xs text-[#e0f7fa] leading-relaxed">{String(v)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 bg-[#030a10] border border-dashed border-[#10293f] rounded-xl text-center">
+            <p className="text-[11px] text-[#4f7b92] italic">Metodoloji adım verileri bu kayıtta bulunamadı.</p>
+          </div>
+        )}
+
+        {/* Root Cause Summary Card */}
+        {record.root_cause && (
+          <div className="p-4 bg-gradient-to-r from-cyan-950/40 to-[#030a10] border border-cyan-500/40 rounded-xl space-y-1.5">
+            <span className="text-[10px] font-bold text-cyan-300 uppercase font-mono tracking-widest flex items-center gap-1.5">
+              🎯 Sentezlenen Kök Neden
+            </span>
+            <p className="text-xs text-[#e0f7fa] leading-relaxed">{record.root_cause}</p>
+          </div>
+        )}
+
+        {/* Corrective Actions Card */}
+        {record.corrective_actions && (
+          <div className="p-4 bg-gradient-to-r from-green-950/30 to-[#030a10] border border-green-500/30 rounded-xl space-y-1.5">
+            <span className="text-[10px] font-bold text-green-400 uppercase font-mono tracking-widest flex items-center gap-1.5">
+              ✅ Önerilen Kalıcı Düzeltici Aksiyon (DÖF/OPL)
+            </span>
+            <p className="text-xs text-[#e0f7fa] leading-relaxed">{record.corrective_actions}</p>
+          </div>
+        )}
       </div>
     );
   };
+
 
   return (
     <div className="w-full flex-1 flex flex-col space-y-6 overflow-hidden animate-fade-in pb-8">

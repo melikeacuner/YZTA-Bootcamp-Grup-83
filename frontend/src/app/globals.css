@@ -177,31 +177,32 @@ input:focus, textarea:focus, select:focus {
   animation: pulseGlow 1.8s infinite ease-in-out;
 }
 
-/* --- Print & PDF Export Rules (A4 Paper Fit) --- */
+/* --- Print & PDF Export Rules (A4 Paper Fit — Dark Theme Preserved) --- */
 @media print {
   @page {
     size: A4;
-    margin: 8mm;
+    margin: 6mm;
   }
 
   html, body {
-    background-color: #ffffff !important;
-    color: #111827 !important;
-    font-size: 9.5px !important;
-    line-height: 1.25 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #030a10 !important;
+    color: #e0f7fa !important;
   }
 
-  .no-print, 
-  nav, 
-  header, 
-  aside, 
-  button, 
+  .no-print,
+  nav,
+  header,
+  aside,
+  button,
   .no-print-area {
     display: none !important;
   }
@@ -210,25 +211,21 @@ input:focus, textarea:focus, select:focus {
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 4px !important;
-    background: #ffffff !important;
-    color: #111827 !important;
+    padding: 6px !important;
     box-shadow: none !important;
-    border: none !important;
     overflow: visible !important;
     max-height: none !important;
     height: auto !important;
   }
 
   .print-container * {
-    color: #111827 !important;
-    background-color: transparent !important;
-    border-color: #d1d5db !important;
-    box-shadow: none !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     word-break: break-word !important;
     overflow-wrap: break-word !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   .print-container h2,
@@ -247,20 +244,6 @@ input:focus, textarea:focus, select:focus {
 
   .print-container .grid {
     gap: 4px !important;
-  }
-
-  .print-container .bg-\[\#030a10\], 
-  .print-container .bg-\[\#061320\], 
-  .print-container .bg-\[\#0a1f33\],
-  .print-container .bg-cyan-950\/20,
-  .print-container .bg-emerald-950\/20,
-  .print-container .bg-purple-950\/20,
-  .print-container .bg-amber-950\/20 {
-    background-color: #f9fafb !important;
-    border: 1px solid #e5e7eb !important;
-    padding: 6px 8px !important;
-    margin-bottom: 4px !important;
-    border-radius: 4px !important;
   }
 }
 

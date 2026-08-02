@@ -402,13 +402,13 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Session Title Header */}
-      <div className="flex items-center justify-between p-4 bg-[#061320] border border-[#10293f] rounded-xl shadow-lg">
-        <div className="flex items-center gap-3">
-          <span className="text-xs px-2.5 py-1 rounded bg-[#10293f] text-[#00e5ff] uppercase font-mono font-semibold flex items-center gap-1.5">
+      <div className="flex items-center justify-between p-4 bg-[#061320] border border-[#10293f] rounded-xl shadow-lg gap-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <span className="text-xs px-2.5 py-1 rounded bg-[#10293f] text-[#00e5ff] uppercase font-mono font-semibold flex items-center gap-1.5 shrink-0">
             <Sparkles size={12} className="text-[#00e5ff] animate-pulse" />
             AI Agent Kök Neden Analizi ({METHODOLOGY_LABELS[session.methodology as keyof typeof METHODOLOGY_LABELS] || session.methodology})
           </span>
-          <p className="text-xs text-[#4f7b92] truncate max-w-xs md:max-w-md">
+          <p className="text-xs text-[#4f7b92] truncate min-w-0">
             {session.problem_description}
           </p>
         </div>
@@ -417,10 +417,23 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
             <button
               type="button"
               onClick={() => {
-                const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || session.problem_description;
+                const desc = session.problem_description || "";
+                const descLower = desc.toLowerCase();
+                // AI dept auto-detect
+                const detectedDept =
+                  descLower.includes("vmware") || descLower.includes("nutanix") || descLower.includes("sunucu") || descLower.includes("server") || descLower.includes("network") || descLower.includes("yazılım") || descLower.includes("veritabanı") || descLower.includes("api") || descLower.includes("sistem") || descLower.includes("bilgi işlem") || descLower.includes("it ") || descLower.startsWith("it") ? "Bilgi İşlem"
+                  : descLower.includes("lojistik") || descLower.includes("depo") || descLower.includes("nakliye") || descLower.includes("sevkiyat") || descLower.includes("tedarik") ? "Lojistik"
+                  : descLower.includes("kalite") || descLower.includes("ölçüm") || descLower.includes("muayene") || descLower.includes("hata") || descLower.includes("reddet") ? "Kalite"
+                  : descLower.includes("finans") || descLower.includes("fatura") || descLower.includes("muhasebe") || descLower.includes("ödeme") || descLower.includes("bütçe") ? "Finans"
+                  : descLower.includes("enjeksiyon") || descLower.includes("makine") || descLower.includes("üretim") || descLower.includes("hat ") || descLower.includes("cnc") || descLower.includes("kaynak") ? "Üretim"
+                  : descLower.includes("ar-ge") || descLower.includes("araştırma") || descLower.includes("geliştirme") ? "Ar-Ge"
+                  : descLower.includes("ik") || descLower.includes("insan kaynakları") || descLower.includes("personel") ? "İnsan Kaynakları"
+                  : department;
+                setDepartment(detectedDept);
+                const synth = aiSynthesizedRoot || rootCause || (Object.values(answersMap).pop() as string) || desc;
                 setRootCause(synth);
                 if (!title) {
-                  setTitle(`Problem: ${session.problem_description.slice(0, 40)}...`);
+                  setTitle(desc);
                 }
                 setShowConfirmModal(true);
               }}
@@ -430,10 +443,18 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
               <span>Oturumu Sonlandır & Havuza Gönder</span>
             </button>
           )}
-          <span className={`text-[10px] px-2 py-0.5 rounded-full ${session.status === "active" ? "bg-green-500/10 text-green-400 font-semibold" : "bg-cyan-500/10 text-cyan-400"
-            }`}>
-            {session.status === "active" ? "Canlı AI Oturumu" : "Tamamlandı"}
-          </span>
+          {/* Live AI Session Badge */}
+          {session.status === "active" ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-950/60 border border-green-500/40 rounded-xl shadow-sm shadow-green-500/10 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-green-400 shadow-sm shadow-green-400/60"></span>
+              <span className="text-[10px] font-bold text-green-300 uppercase tracking-wider font-mono">Canlı AI Oturumu</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-950/40 border border-cyan-500/20 rounded-xl">
+              <span className="w-2 h-2 rounded-full bg-cyan-400/60"></span>
+              <span className="text-[10px] text-cyan-400 font-mono">Tamamlandı</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -709,19 +730,7 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                       />
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-semibold text-[#80deea] flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-400" />
-                        <span>Önerilen Kalıcı Düzeltici Aksiyon (DÖF/OPL) *</span>
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={correctiveActions}
-                        onChange={(e) => setCorrectiveActions(e.target.value)}
-                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
-                        placeholder="Kök nedeni ortadan kaldıracak aksiyon..."
-                      />
-                    </div>
+
                   </div>
 
                   {/* Row 4: Tag & Keyword Management (Interactive Add/Remove) */}
@@ -786,21 +795,24 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                   <div className="flex flex-col gap-1.5">
                     <label className="font-semibold text-[#80deea] flex items-center gap-1">
                       <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Yokoten (Yatay Yayılım) Kapsamı & Hedef Ekipmanlar</span>
+                      <span>Yokoten (Yatay Yayılım) Kapsamı & Hedefler</span>
                     </label>
                     <input
                       type="text"
                       value={yokotenScope}
                       onChange={(e) => setYokotenScope(e.target.value)}
-                      placeholder="Örn: Üretim Hat 1 haricinde Hat 2, Hat 3 ve Bursa Tesisindeki tüm enjeksiyon makinelerine..."
+                      placeholder="Çözümün yayılacağı birimler, ekipmanlar veya tesisler..."
                       className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
                     />
                   </div>
 
-                  {/* Row 6: Task Assignment & FMEA Assessment */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[#10293f]">
+                  {/* Row 6: DevOps Status (assignment will be done in Problem Havuzu) */}
+                  <div className="pt-2 border-t border-[#10293f]">
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-semibold text-[#80deea]">DevOps Aksiyon Durumu</label>
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1.5">
+                        <span>📋 Aksiyon Plan Durumu</span>
+                        <span className="text-[9px] text-[#4f7b92] font-normal">Atama ve termin Problem Havuzu&apos;nda yapılır</span>
+                      </label>
                       <select
                         value={confirmedStatus}
                         onChange={(e) => setConfirmedStatus(e.target.value as "todo" | "in_progress")}
@@ -809,20 +821,6 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                         <option value="todo">📋 Yapılacaklar (To Do)</option>
                         <option value="in_progress">⚙️ Devam Edenler (In Progress)</option>
                       </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-semibold text-[#80deea]">Sorumlu Kişi (Assignee)</label>
-                      <input
-                        type="text"
-                        placeholder="İsim soyisim..."
-                        value={confirmedAssignee}
-                        onChange={(e) => {
-                          setConfirmedAssignee(e.target.value);
-                          if (statusGuardError) setStatusGuardError(null);
-                        }}
-                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa]"
-                      />
                     </div>
                   </div>
 
