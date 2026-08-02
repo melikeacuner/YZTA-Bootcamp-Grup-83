@@ -66,6 +66,9 @@ export default function PoolSessionDetail({ sessionId: recordId, onFinalized, on
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  const [showRcaHistory, setShowRcaHistory] = useState(false);
+  const [isAnalyzingInitial, setIsAnalyzingInitial] = useState(false);
+
   useEffect(() => {
     async function load() {
       if (!token || !recordId) return;
@@ -79,11 +82,15 @@ export default function PoolSessionDetail({ sessionId: recordId, onFinalized, on
         
         const existingHistory = data.meta_data?.resolution_chat_history || [];
         if (existingHistory.length === 0) {
-          const initialGreeting = {
-            role: "assistant",
-            content: `👋 Merhaba! Bu problemin kök nedeni belirlendi: **"${data.root_cause || "Belirtildi"}"**.\n\nSimdi bu kök nedeni **kalıcı olarak gidermek** ve **bir daha yaşanmaması için süreç oluşturmak** üzere çalışacağız:\n1. 🛠️ **Kalıcı Düzeltici Aksiyon**: Kök nedeni tamamen ortadan kaldıracak teknik/operasyonel önlem.\n2. 📜 **Süreç & SOP Güncellemesi**: Operasyonel talimatların ve süreçlerin kalıcı hale getirilmesi.\n3. 🔒 **Poka-Yoke (Hata Önleme)**: İnsan hatasını imkansız kılacak fiziki/yazılımsal bariyerler.\n4. 🚀 **Yokoten (Yatay Yayılım)**: Benzer makine ve hatlara yaygınlaştırılması.\n\nHangi aksiyon adımları ile başlamak istersiniz? Bana belge yükleyebilir veya düşüncelerinizi iletebilirsiniz.`
-          };
-          setMessages([initialGreeting]);
+          setIsAnalyzingInitial(true);
+          setTimeout(() => {
+            setIsAnalyzingInitial(false);
+            const initialGreeting = {
+              role: "assistant",
+              content: `👋 **Merhaba! Proby AI Ajanı problemi, kök nedeni ve geçmiş vakaları (RAG Hafızası) analiz etti.**\n\n📌 **Problem Tanımı**: "${data.description}"\n🎯 **Tespit Edilen Kök Neden**: "${data.root_cause || "Kök neden belirlendi."}"\n\n**🤖 Otomatik Oluşturulan Kalıcı Aksiyon & Çözüm Önerisi (Kurumsal Hafıza)**:\n1. 🛠️ **Önerilen Kalıcı Aksiyon**: ${data.corrective_actions || "Kalıcı aksiyon planı ve periyodik kalibrasyon."}\n2. 📜 **Süreç & Standart İş Talimatı (SOP/OPL)**: Operasyonel talimatların güncellenmesi ve vardiya teslim checklist'ine eklenmesi.\n3. 🔒 **Poka-Yoke (Hata Önleme)**: İnsan hatasını veya teknik aksaklığı imkansız kılacak bariyer.\n4. 🌐 **Yokoten (Yatay Yayılım)**: ${data.closure_checklist?.yokoten_scope || `${data.department || 'İlgili'} birimindeki tüm benzer hat ve ekipmanlara yaygınlaştırılması.`}\n\nBu çözüm önerisini onaylıyor musunuz, veya sahada eklemek istediğiniz özel bir detay var mı?`
+            };
+            setMessages([initialGreeting]);
+          }, 1500);
         } else {
           setMessages(existingHistory);
         }
@@ -446,6 +453,46 @@ export default function PoolSessionDetail({ sessionId: recordId, onFinalized, on
               <div className="p-3 bg-purple-950/10 border border-purple-500/20 rounded-xl space-y-1.5">
                 <span className="text-[10px] font-bold text-purple-400 uppercase font-mono tracking-wide">🎓 Öğrenilen Dersler (Lessons Learned)</span>
                 <p className="leading-relaxed opacity-95 text-[#e0f7fa] whitespace-pre-line">{record.lessons_learned}</p>
+              </div>
+            )}
+
+            {/* RCA Chat History Section (Yeni Problem Çözümü AI Chat Trajectory) */}
+            {((record.meta_data?.rca_chat_history && record.meta_data.rca_chat_history.length > 0) ||
+              (record.methodology_data?.chat_history && record.methodology_data.chat_history.length > 0)) && (
+              <div className="space-y-2 pt-2 border-t border-[#10293f]">
+                <button
+                  type="button"
+                  onClick={() => setShowRcaHistory(!showRcaHistory)}
+                  className="w-full flex items-center justify-between p-3 bg-cyan-950/20 border border-cyan-500/30 hover:bg-cyan-900/30 rounded-xl transition-all text-left"
+                >
+                  <span className="text-xs font-bold text-cyan-300 flex items-center gap-2 font-mono">
+                    <Sparkles size={14} className="text-[#00e5ff]" />
+                    🎯 Kök Neden Bulma Konuşma Geçmişi (Yeni Problem Çözümü AI Chat) ({(record.meta_data?.rca_chat_history || record.methodology_data?.chat_history || []).length} Mesaj)
+                  </span>
+                  <span className="text-[10px] text-cyan-400 font-mono underline">
+                    {showRcaHistory ? "Gizle ▲" : "Göster / İncele ▼"}
+                  </span>
+                </button>
+
+                {showRcaHistory && (
+                  <div className="space-y-2.5 max-h-[350px] overflow-y-auto p-3 bg-[#030a10] border border-[#10293f] rounded-xl text-xs">
+                    {(record.meta_data?.rca_chat_history || record.methodology_data?.chat_history || []).map((msg: any, mIdx: number) => (
+                      <div
+                        key={mIdx}
+                        className={`p-3 rounded-lg leading-relaxed ${
+                          msg.role === "assistant"
+                            ? "bg-[#061320] border border-cyan-500/30 text-[#e0f7fa]"
+                            : "bg-blue-950/40 border border-blue-500/30 text-white ml-4"
+                        }`}
+                      >
+                        <span className="text-[9px] font-bold font-mono uppercase block mb-1 text-cyan-400">
+                          {msg.role === "assistant" ? "🤖 AI Kök Neden Uzmanı" : "👤 Kullanıcı"}
+                        </span>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

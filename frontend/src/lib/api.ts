@@ -130,6 +130,7 @@ export function createRecord(
   payload: {
     session_id: string;
     title: string;
+    description?: string;
     lessons_learned: string;
     root_cause?: string;
     corrective_actions?: string;
@@ -140,6 +141,8 @@ export function createRecord(
     occurrence?: number;
     detection?: number;
     yokoten_applied?: boolean;
+    tags?: string[];
+    closure_checklist?: any;
   },
 ): Promise<RecordResponse> {
   return request<RecordResponse>("/records", {

@@ -57,6 +57,7 @@ class KnowledgeService:
         user_id: uuid.UUID,
         title: str,
         lessons_learned: str,
+        description: str | None = None,
         root_cause: str | None = None,
         corrective_actions: str | None = None,
         industry: str | None = None,
@@ -66,32 +67,57 @@ class KnowledgeService:
         occurrence: int = 1,
         detection: int = 1,
         yokoten_applied: bool = False,
+        tags: list[str] | None = None,
     ) -> ProblemRecordORM:
-        validate_problem_description(problem_session.problem_description)
+        final_description = description or problem_session.problem_description
+        validate_problem_description(final_description)
         validate_lessons_learned(lessons_learned)
+
+        rca_history = problem_session.agent_chat_history or []
+        existing_meta = problem_session.step_data.get("meta_data", {}) if problem_session.step_data else {}
 
         record = ProblemRecordORM(
             session_id=problem_session.id,
             user_id=user_id,
             title=title,
-            description=problem_session.problem_description,
+            description=final_description,
             methodology=problem_session.methodology,
             industry=industry,
             department=department,
             problem_category=problem_category,
-            methodology_data=problem_session.step_responses or problem_session.step_data.get("answers", {}),
+            methodology_data={
+                "answers": problem_session.step_responses or problem_session.step_data.get("answers", {}),
+                "chat_history": rca_history
+            },
             step_responses=problem_session.step_responses or problem_session.step_data.get("answers", {}),
             root_cause=root_cause,
             corrective_actions=corrective_actions,
             lessons_learned=lessons_learned,
+            tags=tags or problem_session.tags or ["kök-neden-bulundu"],
             severity=severity,
             occurrence=occurrence,
             detection=detection,
             rpn=severity * occurrence * detection,
             yokoten_applied=yokoten_applied,
-            closure_checklist={"checklist": ["Oturum tamamlandı", "Rapor kaydedildi"]},
+            closure_checklist={
+                "yokoten_scope": f"{department or 'İlgili'} birimindeki tüm benzer hat ve ekipmanlara standart olarak yaygınlaştırılacaktır.",
+                "checklist": [
+                    f"{problem_session.methodology.upper()} Kök Neden Analizi ve Doğrulaması Tamamlandı",
+                    "Düzeltici ve Önleyici Faaliyetler (DÖF) Uygulandı",
+                    "Saha Kalite Onayı Alındı",
+                    "Yokoten Standart İş Talimatı (SOP) Yayınlandı",
+                    "Qdrant Vektör Hafızasına İndekslendi"
+                ]
+            },
             resolution_status="open",
             resolution_date=None,
+            meta_data={
+                **existing_meta,
+                "rca_chat_history": rca_history,
+                "resolution_chat_history": [],
+                "assignee_name": problem_session.assignee_name,
+                "tracker_name": problem_session.tracker_name
+            },
             embedding_status=EmbeddingStatus.PENDING.value,
         )
         await self._records.create(record)

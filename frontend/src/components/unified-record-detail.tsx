@@ -17,6 +17,7 @@ export default function UnifiedRecordDetail({ recordId, onClose }: UnifiedRecord
   const { token } = useAuth();
   const [record, setRecord] = useState<RecordResponse | null>(null);
   const [tasks, setTasks] = useState<TaskResponse[]>([]);
+  const [showRcaHistory, setShowRcaHistory] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -383,6 +384,46 @@ export default function UnifiedRecordDetail({ recordId, onClose }: UnifiedRecord
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* RCA Agent Chat History Section */}
+        {((record.meta_data?.rca_chat_history && record.meta_data.rca_chat_history.length > 0) ||
+          (record.methodology_data?.chat_history && record.methodology_data.chat_history.length > 0)) && (
+          <div className="pt-6 border-t border-[#10293f] space-y-3 no-print">
+            <button
+              type="button"
+              onClick={() => setShowRcaHistory(!showRcaHistory)}
+              className="w-full flex items-center justify-between p-3.5 bg-cyan-950/20 border border-cyan-500/30 hover:bg-cyan-900/30 rounded-xl transition-all text-left"
+            >
+              <span className="text-xs font-bold text-cyan-300 flex items-center gap-2 font-mono">
+                <Sparkles size={14} className="text-[#00e5ff]" />
+                🎯 Kök Neden Bulma Konuşma Geçmişi (Yeni Problem Çözümü AI Chat) ({(record.meta_data?.rca_chat_history || record.methodology_data?.chat_history || []).length} Mesaj)
+              </span>
+              <span className="text-[10px] text-cyan-400 font-mono underline">
+                {showRcaHistory ? "Gizle ▲" : "Göster / İncele ▼"}
+              </span>
+            </button>
+
+            {showRcaHistory && (
+              <div className="space-y-2.5 max-h-[350px] overflow-y-auto p-4 bg-[#030a10] border border-[#10293f] rounded-xl text-xs">
+                {(record.meta_data?.rca_chat_history || record.methodology_data?.chat_history || []).map((msg: any, mIdx: number) => (
+                  <div
+                    key={mIdx}
+                    className={`p-3.5 rounded-xl leading-relaxed ${
+                      msg.role === "assistant"
+                        ? "bg-[#061320] border border-cyan-500/30 text-[#e0f7fa]"
+                        : "bg-blue-950/40 border border-blue-500/30 text-white ml-6"
+                    }`}
+                  >
+                    <span className="text-[9px] font-bold font-mono uppercase block mb-1 text-cyan-400">
+                      {msg.role === "assistant" ? "🤖 AI Kök Neden Uzmanı" : "👤 Kullanıcı"}
+                    </span>
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

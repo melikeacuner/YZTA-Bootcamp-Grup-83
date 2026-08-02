@@ -22,6 +22,7 @@ MAX_PAGE_SIZE = 100
 class CreateRecordRequest(BaseModel):
     session_id: uuid.UUID
     title: str = Field(min_length=1, max_length=200)
+    description: Optional[str] = None
     lessons_learned: str
     root_cause: Optional[str] = None
     corrective_actions: Optional[str] = None
@@ -32,6 +33,8 @@ class CreateRecordRequest(BaseModel):
     occurrence: Optional[int] = 1
     detection: Optional[int] = 1
     yokoten_applied: Optional[bool] = False
+    tags: Optional[List[str]] = None
+    closure_checklist: Optional[dict] = None
 
 
 class UpdateRecordRequest(BaseModel):
@@ -106,6 +109,7 @@ async def create_record(
         session_obj,
         current_user.id,
         title=payload.title,
+        description=payload.description,
         lessons_learned=payload.lessons_learned,
         root_cause=payload.root_cause,
         corrective_actions=payload.corrective_actions,
@@ -116,6 +120,7 @@ async def create_record(
         occurrence=payload.occurrence or 1,
         detection=payload.detection or 1,
         yokoten_applied=payload.yokoten_applied or False,
+        tags=payload.tags,
     )
     await db.commit()
     return APIResponse.ok(RecordResponse.model_validate(record))

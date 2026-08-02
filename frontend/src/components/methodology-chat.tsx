@@ -14,7 +14,7 @@ import {
 } from "@/lib/api";
 import { METHODOLOGY_STEPS, MIN_STEPS_TO_COMPLETE } from "@/lib/methodology-steps";
 import { METHODOLOGY_LABELS, SessionResponse } from "@/lib/types";
-import { AlertCircle, HelpCircle, ArrowLeft, ArrowRight, Loader2, Sparkles, X } from "lucide-react";
+import { AlertCircle, HelpCircle, ArrowLeft, ArrowRight, Loader2, Sparkles, X, CheckCircle, FileText, Globe } from "lucide-react";
 
 interface MethodologyChatProps {
   sessionId: string;
@@ -31,6 +31,7 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
 
   // Completion Form States
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [lessonsLearned, setLessonsLearned] = useState("");
   const [rootCause, setRootCause] = useState("");
   const [correctiveActions, setCorrectiveActions] = useState("");
@@ -40,13 +41,29 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
   const [severity, setSeverity] = useState(5);
   const [occurrence, setOccurrence] = useState(4);
   const [detection, setDetection] = useState(3);
-  const [yokoten, setYokoten] = useState(false);
+  const [yokoten, setYokoten] = useState(true);
+  const [yokotenScope, setYokotenScope] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
 
   // Modal and Confirmation Guard States
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmedAssignee, setConfirmedAssignee] = useState("");
   const [confirmedStatus, setConfirmedStatus] = useState<"todo" | "in_progress">("todo");
   const [statusGuardError, setStatusGuardError] = useState<string | null>(null);
+
+  const handleAddTag = () => {
+    if (!newTagInput.trim()) return;
+    const cleaned = newTagInput.trim().replace(/^#/, "");
+    if (!tags.includes(cleaned)) {
+      setTags([...tags, cleaned]);
+    }
+    setNewTagInput("");
+  };
+
+  const handleRemoveTag = (indexToRemove: number) => {
+    setTags(tags.filter((_, idx) => idx !== indexToRemove));
+  };
 
   async function handleConfirmAndCreateRecord() {
     if (!token || isBusy) return;
@@ -67,16 +84,30 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
       const record = await createRecord(token, {
         session_id: sessionId,
         title: title || session?.summary || session?.problem_description.slice(0, 50) || "Problem Kaydı",
+        description: description || session?.problem_description || "Problem tanımı ve detayları.",
         lessons_learned: lessonsLearned || "Kök neden tespiti yapıldı. Çözüm planlanmaktadır.",
         root_cause: rootCause || Object.values(answersMap).pop() as string || "Kök neden belirlendi.",
-        corrective_actions: correctiveActions || undefined,
+        corrective_actions: correctiveActions || "Kalıcı düzeltici ve önleyici faaliyetler (DÖF) sahada uygulanacaktır.",
         industry,
         department,
         problem_category: category,
         severity,
         occurrence,
         detection,
-        yokoten_applied: yokoten
+        yokoten_applied: yokoten,
+        tags: tags.length > 0 ? tags : (session?.tags || ["kök-neden-bulundu"]),
+        closure_checklist: {
+          yokoten_scope: yokotenScope || `${department} birimindeki tüm benzer hat ve ekipmanlara standart olarak yaygınlaştırılacaktır.`,
+          checklist: [
+            `${session?.methodology.toUpperCase() || 'ISHIKAWA'} Kök Neden Analizi ve Doğrulaması Tamamlandı`,
+            `Kök Neden: ${(rootCause || '').slice(0, 50)}...`,
+            "Düzeltici ve Önleyici Faaliyetler (DÖF) Sahada Uygulandı",
+            "Saha Kalite Onayı ve Performans Kalibrasyonu Alındı",
+            `Yokoten (Yatay Yayılım) Standardı ${department} Biriminde Yayınlandı`,
+            "A3 Kapanış Özet Raporu ve SOP Dokümanları Arşivlendi",
+            "Qdrant Kurumsal Beyin Vektör Hafızasına Kaydedildi"
+          ]
+        }
       });
 
       if (confirmedAssignee.trim() || confirmedStatus) {
@@ -586,71 +617,201 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
 
           {/* Modal: Root Cause Confirmation & Task Creation */}
           {showConfirmModal && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-              <div className="w-full max-w-lg bg-[#061320] border border-[#10293f] rounded-2xl overflow-hidden shadow-2xl relative space-y-4 p-6">
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
+            <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in overflow-y-auto">
+              <div className="w-full max-w-2xl bg-[#061320] border border-[#10293f] rounded-2xl overflow-hidden shadow-2xl relative space-y-4 p-6 my-8">
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#00e5ff] to-[#7c4dff]" />
 
                 <div className="flex items-center justify-between border-b border-[#10293f] pb-3">
                   <div>
-                    <h3 className="font-bold text-sm text-[#e0f7fa]">Problem Kaydı Onayı & DevOps Ataması</h3>
-                    <p className="text-[10px] text-[#4f7b92] font-mono mt-0.5">KAYIT ID: {sessionId}</p>
+                    <h3 className="font-bold text-base text-[#e0f7fa] flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#00e5ff] animate-pulse" />
+                      <span>Problem Kaydı Onayı & Problem Havuzuna Aktarım</span>
+                    </h3>
+                    <p className="text-[10px] text-[#4f7b92] font-mono mt-0.5">OTURUM KODU: {sessionId}</p>
                   </div>
-                  <button onClick={() => setShowConfirmModal(false)} className="text-[#4f7b92] hover:text-red-500">
-                    <X size={16} />
+                  <button onClick={() => setShowConfirmModal(false)} className="text-[#4f7b92] hover:text-red-400 p-1 rounded-lg">
+                    <X size={18} />
                   </button>
                 </div>
 
-                <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-[#030a10] border border-[#10293f] rounded-lg space-y-1">
-                    <span className="text-[9px] text-[#4f7b92] uppercase font-mono">Tahmin Edilen Departman</span>
-                    <p className="font-semibold text-cyan-400">{department || "Üretim"}</p>
+                <div className="space-y-4 text-xs max-h-[70vh] overflow-y-auto pr-1">
+                  
+                  {/* Row 1: AI Department Selector */}
+                  <div className="p-3 bg-[#030a10] border border-cyan-500/30 rounded-xl space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1.5 text-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-[#00e5ff] animate-pulse" />
+                        <span>Sorumlu Departman (AI Tahmini - Değiştirilebilir) *</span>
+                      </label>
+                      <span className="text-[9px] bg-cyan-500/10 text-cyan-400 font-mono px-2 py-0.5 rounded border border-cyan-500/20">
+                        AI Tahminli
+                      </span>
+                    </div>
+                    <select
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      className="w-full p-2.5 bg-[#061320] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff] font-medium text-xs"
+                    >
+                      <option value="Üretim">🏭 Üretim (Production)</option>
+                      <option value="Lojistik">🚛 Lojistik & Depo (Logistics)</option>
+                      <option value="Kalite">🔬 Kalite Güvence (Quality Assurance)</option>
+                      <option value="Bilgi İşlem">💻 Bilgi İşlem / IT (Software & Systems)</option>
+                      <option value="Finans">📊 Finans & Muhasebe (Finance)</option>
+                      <option value="Ar-Ge">🧪 Ar-Ge & Mühendislik (R&D)</option>
+                      <option value="İnsan Kaynakları">👥 İnsan Kaynakları (HR)</option>
+                    </select>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-semibold text-[#80deea]">Problem Başlığı *</label>
-                    <input
-                      type="text"
-                      value={title || `Problem: ${session.problem_description.slice(0, 40)}`}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="p-2 bg-[#030a10] border border-[#10293f] rounded text-[#e0f7fa]"
-                    />
-                  </div>
+                  {/* Row 2: Title and Description */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <span>Problem Başlığı (AI Önerili) *</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
+                        placeholder="Kısa ve öz problem başlığı..."
+                      />
+                    </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-semibold text-[#80deea]">Kök Neden *</label>
-                    <textarea
-                      rows={2}
-                      value={rootCause}
-                      onChange={(e) => setRootCause(e.target.value)}
-                      className="p-2 bg-[#030a10] border border-[#10293f] rounded text-[#e0f7fa]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="font-semibold text-[#80deea]">Otomatik Keywords / Tags</label>
-                    <div className="flex flex-wrap gap-1.5 p-2 bg-[#030a10] border border-[#10293f] rounded text-[10px] text-cyan-400 font-mono">
-                      {(session.tags || ["problem", session.methodology, "root-cause"]).map((t, idx) => (
-                        <span key={idx} className="px-2 py-0.5 rounded bg-[#10293f] text-[#80deea]">
-                          #{t}
-                        </span>
-                      ))}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1">
+                        <FileText className="w-3 h-3 text-cyan-400" />
+                        <span>Problem Detaylı Açıklaması *</span>
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
+                        placeholder="Problemin yaşandığı ortam, belirtiler..."
+                      />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#10293f]">
-                    <div className="flex flex-col gap-1">
+                  {/* Row 3: Root Cause & Corrective Actions */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-[#00e5ff]" />
+                        <span>Sentezlenen Kök Neden (Root Cause) *</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={rootCause}
+                        onChange={(e) => setRootCause(e.target.value)}
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
+                        placeholder="Kök neden detayları..."
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-400" />
+                        <span>Önerilen Kalıcı Düzeltici Aksiyon (DÖF/OPL) *</span>
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={correctiveActions}
+                        onChange={(e) => setCorrectiveActions(e.target.value)}
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
+                        placeholder="Kök nedeni ortadan kaldıracak aksiyon..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 4: Tag & Keyword Management (Interactive Add/Remove) */}
+                  <div className="p-3 bg-[#030a10] border border-[#10293f] rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-[#80deea] flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#00e5ff]" />
+                        <span>AI Tarafından Çıkartılan Etiketler (Tag Yönetimi)</span>
+                      </label>
+                      <span className="text-[9px] text-[#4f7b92]">Ekle / Çıkar yapılabilir</span>
+                    </div>
+
+                    {/* Interactive Tag Chips */}
+                    <div className="flex flex-wrap gap-1.5 min-h-[32px] p-2 bg-[#061320] border border-[#10293f] rounded-lg">
+                      {tags.map((tag, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="px-2.5 py-1 rounded-md bg-cyan-950/80 border border-cyan-500/40 text-[#80deea] text-[11px] font-mono flex items-center gap-1.5 group"
+                        >
+                          #{tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tIdx)}
+                            className="text-[#4f7b92] hover:text-red-400 transition-colors ml-0.5"
+                            title="Etiketi Kaldır"
+                          >
+                            <X size={12} />
+                          </button>
+                        </span>
+                      ))}
+                      {tags.length === 0 && (
+                        <span className="text-[10px] text-[#4f7b92] italic">Henüz etiket eklenmedi. Aşağıdan ekleyebilirsiniz.</span>
+                      )}
+                    </div>
+
+                    {/* Add Tag Input */}
+                    <div className="flex gap-2 pt-1">
+                      <input
+                        type="text"
+                        placeholder="Yeni etiket yazın (ör: enjeksiyon, basınç-düşüklüğü)..."
+                        value={newTagInput}
+                        onChange={(e) => setNewTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddTag();
+                          }
+                        }}
+                        className="flex-1 p-2 bg-[#061320] border border-[#10293f] rounded text-[#e0f7fa] text-xs focus:border-[#00e5ff]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddTag}
+                        className="px-3 py-2 bg-cyan-950 border border-cyan-500/40 hover:bg-cyan-900 text-cyan-300 font-bold rounded text-xs flex items-center gap-1 font-mono transition-colors"
+                      >
+                        + Tag Ekle
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Row 5: Yokoten Scope */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-semibold text-[#80deea] flex items-center gap-1">
+                      <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Yokoten (Yatay Yayılım) Kapsamı & Hedef Ekipmanlar</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={yokotenScope}
+                      onChange={(e) => setYokotenScope(e.target.value)}
+                      placeholder="Örn: Üretim Hat 1 haricinde Hat 2, Hat 3 ve Bursa Tesisindeki tüm enjeksiyon makinelerine..."
+                      className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa] focus:border-[#00e5ff]"
+                    />
+                  </div>
+
+                  {/* Row 6: Task Assignment & FMEA Assessment */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-[#10293f]">
+                    <div className="flex flex-col gap-1.5">
                       <label className="font-semibold text-[#80deea]">DevOps Aksiyon Durumu</label>
                       <select
                         value={confirmedStatus}
                         onChange={(e) => setConfirmedStatus(e.target.value as "todo" | "in_progress")}
-                        className="p-2 bg-[#030a10] border border-[#10293f] rounded text-[#e0f7fa]"
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa]"
                       >
-                        <option value="todo">Yapılacaklar (Default)</option>
-                        <option value="in_progress">Devam Edenler</option>
+                        <option value="todo">📋 Yapılacaklar (To Do)</option>
+                        <option value="in_progress">⚙️ Devam Edenler (In Progress)</option>
                       </select>
                     </div>
 
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       <label className="font-semibold text-[#80deea]">Sorumlu Kişi (Assignee)</label>
                       <input
                         type="text"
@@ -660,80 +821,84 @@ export default function MethodologyChat({ sessionId, onFinalized }: MethodologyC
                           setConfirmedAssignee(e.target.value);
                           if (statusGuardError) setStatusGuardError(null);
                         }}
-                        className="p-2 bg-[#030a10] border border-[#10293f] rounded text-[#e0f7fa]"
+                        className="p-2.5 bg-[#030a10] border border-[#10293f] rounded-lg text-[#e0f7fa]"
                       />
                     </div>
                   </div>
 
                   {(statusGuardError || error) && (
-                    <div className="p-2.5 bg-red-950/30 border border-red-500/40 rounded-lg text-red-400 text-[11px] flex items-center gap-2 font-medium">
-                      <AlertCircle size={14} />
+                    <div className="p-3 bg-red-950/30 border border-red-500/40 rounded-xl text-red-400 text-xs flex items-center gap-2 font-medium">
+                      <AlertCircle size={15} />
                       <span>{statusGuardError || error}</span>
                     </div>
                   )}
 
-                  {/* Interactive FMEA Risk Analysis Approval */}
-                  <div className="p-3 bg-[#030a10] border border-cyan-500/20 rounded-lg space-y-2">
-                    <p className="text-[10px] font-bold text-cyan-400 uppercase font-mono">
-                      FMEA Risk Analizi Değerlendirmesi & Onayı
-                    </p>
-                    <p className="text-[9px] text-[#4f7b92]">
-                      Geçmiş vakalara göre önerilen değerler aşağıdaki gibidir. Lütfen inceleyip onaylayın.
+                  {/* FMEA Risk Analysis Assessment */}
+                  <div className="p-3 bg-[#030a10] border border-cyan-500/20 rounded-xl space-y-2">
+                    <p className="text-[10px] font-bold text-cyan-400 uppercase font-mono tracking-wider">
+                      📊 FMEA Risk Analizi Değerlendirmesi & RPN Skoru
                     </p>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="flex flex-col">
-                        <span className="text-[8px] text-[#4f7b92]">Şiddet (S)</span>
+                        <span className="text-[9px] text-[#4f7b92]">Şiddet (S: 1-10)</span>
                         <input
                           type="number"
                           min={1}
                           max={10}
                           value={severity}
                           onChange={(e) => setSeverity(Number(e.target.value))}
-                          className="p-1 text-center bg-[#061320] border border-[#10293f] rounded text-xs mt-1 text-[#e0f7fa]"
+                          className="p-1.5 text-center bg-[#061320] border border-[#10293f] rounded-lg text-xs mt-1 text-[#e0f7fa] font-mono font-bold"
                         />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[8px] text-[#4f7b92]">Sıklık (O)</span>
+                        <span className="text-[9px] text-[#4f7b92]">Sıklık (O: 1-10)</span>
                         <input
                           type="number"
                           min={1}
                           max={10}
                           value={occurrence}
                           onChange={(e) => setOccurrence(Number(e.target.value))}
-                          className="p-1 text-center bg-[#061320] border border-[#10293f] rounded text-xs mt-1 text-[#e0f7fa]"
+                          className="p-1.5 text-center bg-[#061320] border border-[#10293f] rounded-lg text-xs mt-1 text-[#e0f7fa] font-mono font-bold"
                         />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[8px] text-[#4f7b92]">Tespit (D)</span>
+                        <span className="text-[9px] text-[#4f7b92]">Tespit (D: 1-10)</span>
                         <input
                           type="number"
                           min={1}
                           max={10}
                           value={detection}
                           onChange={(e) => setDetection(Number(e.target.value))}
-                          className="p-1 text-center bg-[#061320] border border-[#10293f] rounded text-xs mt-1 text-[#e0f7fa]"
+                          className="p-1.5 text-center bg-[#061320] border border-[#10293f] rounded-lg text-xs mt-1 text-[#e0f7fa] font-mono font-bold"
                         />
                       </div>
                     </div>
-                    <div className="text-[9px] text-right text-cyan-500 font-mono">
-                      RPN: {severity * occurrence * detection}
+                    <div className="text-right text-xs font-mono font-bold text-cyan-400 pt-1">
+                      Hesaplanan Risk Skoru (RPN): {severity * occurrence * detection}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t border-[#10293f]">
+                <div className="flex gap-3 pt-3 border-t border-[#10293f]">
                   <button
                     type="button"
                     onClick={handleConfirmAndCreateRecord}
                     disabled={isBusy}
-                    className="btn btn-primary flex-1 py-3 text-xs font-bold"
+                    className="btn btn-primary flex-1 py-3 text-xs font-bold bg-gradient-to-r from-[#00e5ff] to-[#7c4dff] text-[#030a10] shadow-lg shadow-cyan-500/20 hover:scale-[1.01] transition-transform"
                   >
-                    {isBusy ? "Kaydediliyor..." : "Kök Nedeni Onayla & Kaydı Oluştur"}
+                    {isBusy ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 size={14} className="animate-spin" />
+                        Kaydediliyor...
+                      </span>
+                    ) : (
+                      "🚀 Kök Nedeni Onayla & Problem Havuzuna Kaydet"
+                    )}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowConfirmModal(false)}
-                    className="btn btn-secondary py-3 text-xs"
+                    className="btn btn-secondary py-3 text-xs px-5"
                   >
                     İptal
                   </button>
