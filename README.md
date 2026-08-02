@@ -151,6 +151,7 @@ Bu backlog, projenin final ürün haline getirilmesini temel alacak şekilde haz
 
 ### - Daily Scrum:
 Daily Scrum toplantıları, ekip yoğunlukları nedeniyle her gün düzenli olarak gerçekleştirilememiştir; ancak proje ile ilgili gelişmeler WhatsApp üzerinden sürekli olarak iletişim halinde kalınarak takip edilmiştir. Sprint başlangıç ve bitişlerinde ise Slack üzerinden düzenli toplantılar yapılmıştır.
+
 Konuşma ScreenShotları :
 https://imgur.com/a/fU7I5BC
 
